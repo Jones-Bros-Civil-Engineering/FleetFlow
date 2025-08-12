@@ -138,7 +138,9 @@ Open [http://localhost:5173](http://localhost:5173) (or the port Vite shows). Th
 
 ## Deployment
 
-* **Frontend:** Netlify (set `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` in site env). Build: `npm run build`, Publish dir: `dist/`.
+Detailed deployment instructions live in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Versioning and release guidance is in [docs/RELEASE.md](docs/RELEASE.md).
+
+* **Frontend:** Netlify (build: `npm run build`, publish: `dist/`). Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as site environment variables.
 * **Database:** Managed by Supabase; apply schema changes via SQL migrations.
 
 ## Roadmap
