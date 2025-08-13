@@ -38,3 +38,16 @@
   border: none;
   cursor: pointer;
 }
+
+.utilization-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.utilization-table th,
+.utilization-table td {
+  border: 1px solid #ccc;
+  padding: 0.25rem;
+  text-align: center;
+}
