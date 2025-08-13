@@ -1,10 +1,18 @@
 import { useState } from 'react'
 import WeekCalendar from '../components/WeekCalendar'
-import { useEventsQuery } from '../api/queries'
+import {
+  useEventsQuery,
+  useEquipmentGroupsQuery,
+  useAllocationsQuery,
+  useRequestsQuery,
+} from '../api/queries'
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const { data: events, isLoading, error } = useEventsQuery()
+  const { data: groups } = useEquipmentGroupsQuery()
+  const { data: allocations } = useAllocationsQuery()
+  const { data: requests } = useRequestsQuery()
 
   if (isLoading) {
     return <div>Loading events...</div>
@@ -22,6 +30,16 @@ export default function CalendarPage() {
   return (
     <div>
       <h1>Calendar</h1>
+      <section>
+        <h2>Equipment Groups</h2>
+        <ul>
+          {groups?.map((g) => (
+            <li key={g.id}>{g.name}</li>
+          ))}
+        </ul>
+        <div>Requests: {requests?.length ?? 0}</div>
+        <div>Allocations: {allocations?.length ?? 0}</div>
+      </section>
       <WeekCalendar
         selectedDate={selectedDate}
         events={events ?? []}
