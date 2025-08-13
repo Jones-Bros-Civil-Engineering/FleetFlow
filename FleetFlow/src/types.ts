@@ -3,3 +3,8 @@ export interface CalendarEvent {
   date: Date
   title: string
 }
+
+export interface Example {
+  id: number
+  name: string
+}
