@@ -6,11 +6,13 @@ import {
   EquipmentGroupSchema,
   AllocationSchema,
   RequestSchema,
+  WeeklyGroupUtilizationSchema,
   type Example,
   type CalendarEvent,
   type EquipmentGroup,
   type Allocation,
   type Request,
+  type WeeklyGroupUtilization,
 } from '../types'
 
 export const fetchExample = async (): Promise<Example[]> => {
@@ -81,4 +83,20 @@ export const useRequestsQuery = () =>
   useQuery<Request[], Error>({
     queryKey: ['requests'],
     queryFn: fetchRequests,
+  })
+
+export const fetchWeeklyGroupUtilization = async (): Promise<WeeklyGroupUtilization[]> => {
+  const { data, error } = await supabase
+    .from('vw_weekly_group_utilization')
+    .select('*')
+  if (error) {
+    throw new Error(error.message)
+  }
+  return WeeklyGroupUtilizationSchema.array().parse(data ?? [])
+}
+
+export const useWeeklyGroupUtilizationQuery = () =>
+  useQuery<WeeklyGroupUtilization[], Error>({
+    queryKey: ['weekly-group-utilization'],
+    queryFn: fetchWeeklyGroupUtilization,
   })

@@ -5,6 +5,7 @@ import {
   useEquipmentGroupsQuery,
   useAllocationsQuery,
   useRequestsQuery,
+  useWeeklyGroupUtilizationQuery,
 } from '../api/queries'
 
 export default function CalendarPage() {
@@ -13,6 +14,7 @@ export default function CalendarPage() {
   const { data: groups } = useEquipmentGroupsQuery()
   const { data: allocations } = useAllocationsQuery()
   const { data: requests } = useRequestsQuery()
+  const { data: utilization } = useWeeklyGroupUtilizationQuery()
 
   if (isLoading) {
     return <div>Loading events...</div>
@@ -43,6 +45,8 @@ export default function CalendarPage() {
       <WeekCalendar
         selectedDate={selectedDate}
         events={events ?? []}
+        utilization={utilization ?? []}
+        groups={groups ?? []}
         onSelectDate={setSelectedDate}
         onPrevWeek={handlePrevWeek}
         onNextWeek={handleNextWeek}

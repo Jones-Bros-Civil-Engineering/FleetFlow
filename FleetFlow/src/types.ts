@@ -42,3 +42,10 @@ export const RequestSchema = z.object({
   operated: z.boolean(),
 })
 export type Request = z.infer<typeof RequestSchema>
+
+export const WeeklyGroupUtilizationSchema = z.object({
+  week_start: z.coerce.date(),
+  group_id: z.string(),
+  on_hire_count: z.number(),
+})
+export type WeeklyGroupUtilization = z.infer<typeof WeeklyGroupUtilizationSchema>
