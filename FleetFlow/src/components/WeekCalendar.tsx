@@ -1,8 +1,10 @@
 import { getWeekDays } from '../lib/weeks'
+import type { CalendarEvent } from '../types'
 import './week-calendar.css'
 
 export interface WeekCalendarProps {
   selectedDate: Date
+  events?: CalendarEvent[]
   onSelectDate?: (date: Date) => void
   onPrevWeek?: () => void
   onNextWeek?: () => void
@@ -10,6 +12,7 @@ export interface WeekCalendarProps {
 
 export default function WeekCalendar({
   selectedDate,
+  events,
   onSelectDate,
   onPrevWeek,
   onNextWeek,
@@ -28,14 +31,25 @@ export default function WeekCalendar({
             weekday: 'short',
             day: 'numeric',
           })
+          const dayEvents =
+            events?.filter((e) => {
+              const date = e.date instanceof Date ? e.date : new Date(e.date)
+              return date.toDateString() === day.toDateString()
+            }) ?? []
           return (
-            <button
-              key={day.toISOString()}
-              className={`day-label${isSelected ? ' selected' : ''}`}
-              onClick={() => onSelectDate?.(day)}
-            >
-              {label}
-            </button>
+            <div key={day.toISOString()} className='day-column'>
+              <button
+                className={`day-label${isSelected ? ' selected' : ''}`}
+                onClick={() => onSelectDate?.(day)}
+              >
+                {label}
+              </button>
+              {dayEvents.map((ev) => (
+                <div key={ev.id} className='event'>
+                  {ev.title}
+                </div>
+              ))}
+            </div>
           )
         })}
       </div>
