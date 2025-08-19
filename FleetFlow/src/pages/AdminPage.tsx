@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { toast } from 'react-hot-toast'
 
 type Profile = {
   id: string
@@ -53,13 +54,27 @@ export default function AdminPage() {
       setError(msg)
       return
     }
-    const { error } = await supabase.from('profiles').insert([newForm])
+    const tempId = crypto.randomUUID()
+    const optimisticProfile = { id: tempId, ...newForm }
+    const previous = profiles
+    const form = newForm
+    setProfiles([...profiles, optimisticProfile])
+    setNewForm({ email: '', role: 'contract_manager' })
+    setError(null)
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert([newForm])
+      .select('id, email, role')
+      .single()
     if (error) {
+      setProfiles(previous)
+      setNewForm(form)
       setError(error.message)
-    } else {
-      setNewForm({ email: '', role: 'contract_manager' })
-      setError(null)
-      fetchProfiles()
+      toast.error(error.message)
+    } else if (data) {
+      setProfiles((prev) => prev.map((p) => (p.id === tempId ? data : p)))
+      toast.success('User created')
     }
   }
 
@@ -74,16 +89,29 @@ export default function AdminPage() {
       setError(msg)
       return
     }
-    const { error } = await supabase
+    const previousProfiles = profiles
+    const previousProfile = profiles.find((p) => p.id === id)!
+    setProfiles((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, email: editForm.email, role: editForm.role } : p)),
+    )
+    setEditingId(null)
+    setError(null)
+
+    const { data, error } = await supabase
       .from('profiles')
       .update({ email: editForm.email, role: editForm.role })
       .eq('id', id)
+      .select('id, email, role')
+      .single()
     if (error) {
+      setProfiles(previousProfiles)
+      setEditingId(id)
+      setEditForm({ email: previousProfile.email, role: previousProfile.role })
       setError(error.message)
-    } else {
-      setEditingId(null)
-      setError(null)
-      fetchProfiles()
+      toast.error(error.message)
+    } else if (data) {
+      setProfiles((prev) => prev.map((p) => (p.id === id ? data : p)))
+      toast.success('User updated')
     }
   }
 
@@ -91,14 +119,19 @@ export default function AdminPage() {
     if (!window.confirm('Delete this user?')) {
       return
     }
+    const previousProfiles = profiles
+    setProfiles((prev) => prev.filter((p) => p.id !== id))
+
     const { error } = await supabase
       .from('profiles')
       .update({ is_active: false })
       .eq('id', id)
     if (error) {
+      setProfiles(previousProfiles)
       setError(error.message)
+      toast.error(error.message)
     } else {
-      fetchProfiles()
+      toast.success('User deleted')
     }
   }
 
