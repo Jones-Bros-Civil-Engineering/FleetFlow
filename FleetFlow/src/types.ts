@@ -52,6 +52,7 @@ export type Request = z.infer<typeof RequestSchema>
 
 export const WeeklyGroupUtilizationSchema = z.object({
   week_start: z.coerce.date(),
+  contract_id: z.string(),
   group_id: z.string(),
   on_hire_count: z.number(),
 })
