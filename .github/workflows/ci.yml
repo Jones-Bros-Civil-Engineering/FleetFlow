@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  push:
   pull_request:
 
 jobs:
@@ -22,6 +23,10 @@ jobs:
 
       - name: Lint
         run: npm run lint
+        working-directory: FleetFlow
+
+      - name: Type check
+        run: npm run typecheck
         working-directory: FleetFlow
 
       - name: Test

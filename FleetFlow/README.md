@@ -90,6 +90,7 @@ VITE_SUPABASE_ANON_KEY=YOUR-ANON-KEY
   * `vw_weekly_group_utilization`
   * `vw_allocation_bars`
 * (Optional) add `vw_external_bars` mirroring external hires.
+* For migration details and CLI commands see [supabase/README.md](supabase/README.md).
 
 ## Running locally
 
