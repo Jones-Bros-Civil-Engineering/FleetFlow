@@ -14,6 +14,20 @@ import { supabase } from '../lib/supabase'
 import {
   useExampleQuery,
   fetchExample,
+  useEventsQuery,
+  fetchEvents,
+  useEquipmentGroupsQuery,
+  fetchEquipmentGroups,
+  useAllocationsQuery,
+  fetchAllocations,
+  useRequestsQuery,
+  fetchRequests,
+  useWeeklyGroupUtilizationQuery,
+  fetchWeeklyGroupUtilization,
+  useWeekStartsQuery,
+  fetchWeekStarts,
+  useOperatorAssignmentsQuery,
+  fetchOperatorAssignments,
   scoreAssets,
   rankOperators,
   offHireAllocation,
@@ -32,6 +46,96 @@ describe('useExampleQuery', () => {
       queryFn: fetchExample,
     })
     expect(result).toBe(fakeResult)
+  })
+})
+
+describe('other query hooks', () => {
+  beforeEach(() => {
+    ;(useQuery as Mock).mockReset()
+    rpcMock.mockReset()
+  })
+
+  it('uses correct key for events', () => {
+    const fake = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fake)
+    const result = useEventsQuery()
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['events'],
+      queryFn: fetchEvents,
+    })
+    expect(result).toBe(fake)
+  })
+
+  it('uses correct key for equipment groups', () => {
+    const fake = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fake)
+    const result = useEquipmentGroupsQuery()
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['equipment-groups'],
+      queryFn: fetchEquipmentGroups,
+    })
+    expect(result).toBe(fake)
+  })
+
+  it('uses correct key for allocations', () => {
+    const fake = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fake)
+    const result = useAllocationsQuery()
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['allocations'],
+      queryFn: fetchAllocations,
+    })
+    expect(result).toBe(fake)
+  })
+
+  it('uses correct key for requests', () => {
+    const fake = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fake)
+    const result = useRequestsQuery()
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['requests'],
+      queryFn: fetchRequests,
+    })
+    expect(result).toBe(fake)
+  })
+
+  it('uses correct key for utilization', () => {
+    const fake = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fake)
+    const result = useWeeklyGroupUtilizationQuery()
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['weekly-group-utilization'],
+      queryFn: fetchWeeklyGroupUtilization,
+    })
+    expect(result).toBe(fake)
+  })
+
+  it('passes dates to week starts query', async () => {
+    const fake = { data: [] }
+    const start = new Date('2024-01-01')
+    const end = new Date('2024-01-07')
+    rpcMock.mockResolvedValue({ data: [], error: null })
+    ;(useQuery as Mock).mockReturnValue(fake)
+    const result = useWeekStartsQuery(start, end)
+    const call = (useQuery as Mock).mock.calls.at(-1)![0]
+    expect(call.queryKey).toEqual(['week-starts', start, end])
+    await call.queryFn()
+    expect(rpcMock).toHaveBeenCalledWith('rpc_week_starts', {
+      start_date: '2024-01-01',
+      end_date: '2024-01-07',
+    })
+    expect(result).toBe(fake)
+  })
+
+  it('uses correct key for operator assignments', () => {
+    const fake = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fake)
+    const result = useOperatorAssignmentsQuery()
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['operator-assignments'],
+      queryFn: fetchOperatorAssignments,
+    })
+    expect(result).toBe(fake)
   })
 })
 
