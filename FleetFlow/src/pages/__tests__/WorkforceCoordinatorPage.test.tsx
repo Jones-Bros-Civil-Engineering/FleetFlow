@@ -36,8 +36,9 @@ vi.mock('../../lib/supabase', () => ({
   },
 }))
 
+const validateOperatorAssignmentMock = vi.hoisted(() => vi.fn())
 vi.mock('../../utils/validation', () => ({
-  validateOperatorAssignment: vi.fn(),
+  validateOperatorAssignment: validateOperatorAssignmentMock,
 }))
 
 import WorkforceCoordinatorPage from '../WorkforceCoordinatorPage'
@@ -59,6 +60,7 @@ describe('WorkforceCoordinatorPage', () => {
     rankOperatorsMock.mockClear()
     insertMock.mockClear()
     fromMock.mockClear()
+    validateOperatorAssignmentMock.mockClear()
   })
 
   it('ranks operators and displays matches', async () => {
@@ -86,6 +88,20 @@ describe('WorkforceCoordinatorPage', () => {
       start_date: request.start_date.toISOString(),
       end_date: request.end_date.toISOString(),
     })
+  })
+
+  it('shows validation error when operator missing tickets', async () => {
+    validateOperatorAssignmentMock.mockRejectedValue(
+      new Error('MISSING_REQUIRED_TICKETS'),
+    )
+    renderPage()
+    fireEvent.click(screen.getByText('Rank Operators'))
+    await screen.findByText(/Op One/)
+    fireEvent.click(screen.getByText('Assign'))
+    await screen.findByRole('alert')
+    expect(screen.getByRole('alert').textContent).toMatch(
+      /missing required tickets/i,
+    )
   })
 })
 

@@ -17,6 +17,7 @@ export default function WorkforceCoordinatorPage() {
   const [rankingId, setRankingId] = useState<string | null>(null)
   const [assigningId, setAssigningId] = useState<string | null>(null)
   const [matches, setMatches] = useState<Record<string, OperatorMatch[]>>({})
+  const [assignError, setAssignError] = useState<string | null>(null)
 
   const rankMutation = useMutation({
     mutationFn: (request: Request) =>
@@ -45,7 +46,17 @@ export default function WorkforceCoordinatorPage() {
       startDate: Date
       endDate: Date
     }) => {
-      await validateOperatorAssignment(groupId, operatorId)
+      try {
+        await validateOperatorAssignment(groupId, operatorId)
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message === 'MISSING_REQUIRED_TICKETS'
+        ) {
+          throw new Error('Operator is missing required tickets')
+        }
+        throw err
+      }
       const { error } = await supabase.from('operator_assignments').insert({
         request_id: requestId,
         operator_id: operatorId,
@@ -57,7 +68,11 @@ export default function WorkforceCoordinatorPage() {
       }
     },
     onSuccess: () => {
+      setAssignError(null)
       queryClient.invalidateQueries({ queryKey: ['operator-assignments'] })
+    },
+    onError: (err: Error) => {
+      setAssignError(err.message || 'Error assigning operator')
     },
   })
 
@@ -75,6 +90,7 @@ export default function WorkforceCoordinatorPage() {
 
   const handleAssign = (r: Request, operatorId: string) => {
     setAssigningId(r.id)
+    setAssignError(null)
     assignMutation.mutate({
       requestId: r.id,
       groupId: r.group_id,
@@ -124,10 +140,10 @@ export default function WorkforceCoordinatorPage() {
               />
             )}
             {assignMutation.isError && assigningId === r.id && (
-              <div>Error assigning operator</div>
+              <div role="alert">{assignError}</div>
             )}
             {assignMutation.isSuccess && assigningId === r.id && (
-              <div>Operator assigned!</div>
+              <div role="alert">Operator assigned!</div>
             )}
           </li>
         ))}
