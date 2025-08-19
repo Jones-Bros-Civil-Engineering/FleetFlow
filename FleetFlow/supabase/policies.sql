@@ -7,23 +7,23 @@ revoke select on external_hires from public;
 create policy external_hires_select_plant on external_hires
 for select
 to authenticated
-using (auth.jwt() ->> 'role' = 'plant_coordinator');
+using (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 create policy external_hires_insert_plant on external_hires
 for insert
 to authenticated
-with check (auth.jwt() ->> 'role' = 'plant_coordinator');
+with check (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 create policy external_hires_update_plant on external_hires
 for update
 to authenticated
-using (auth.jwt() ->> 'role' = 'plant_coordinator')
-with check (auth.jwt() ->> 'role' = 'plant_coordinator');
+using (auth.jwt() ->> 'role' in ('plant_coordinator','admin'))
+with check (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 create policy external_hires_delete_plant on external_hires
 for delete
 to authenticated
-using (auth.jwt() ->> 'role' = 'plant_coordinator');
+using (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 -- allocations: only plant coordinators may modify
 alter table allocations enable row level security;
@@ -32,23 +32,23 @@ revoke select on allocations from public;
 create policy allocations_select_plant on allocations
 for select
 to authenticated
-using (auth.jwt() ->> 'role' = 'plant_coordinator');
+using (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 create policy allocations_insert_plant on allocations
 for insert
 to authenticated
-with check (auth.jwt() ->> 'role' = 'plant_coordinator');
+with check (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 create policy allocations_update_plant on allocations
 for update
 to authenticated
-using (auth.jwt() ->> 'role' = 'plant_coordinator')
-with check (auth.jwt() ->> 'role' = 'plant_coordinator');
+using (auth.jwt() ->> 'role' in ('plant_coordinator','admin'))
+with check (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 create policy allocations_delete_plant on allocations
 for delete
 to authenticated
-using (auth.jwt() ->> 'role' = 'plant_coordinator');
+using (auth.jwt() ->> 'role' in ('plant_coordinator','admin'));
 
 -- operator_assignments: only workforce coordinators may modify
 alter table operator_assignments enable row level security;
@@ -57,27 +57,27 @@ revoke select on operator_assignments from public;
 create policy operator_assignments_select_workforce on operator_assignments
 for select
 to authenticated
-using (auth.jwt() ->> 'role' = 'workforce_coordinator');
+using (auth.jwt() ->> 'role' in ('workforce_coordinator','admin'));
 
 create policy operator_assignments_insert_workforce on operator_assignments
 for insert
 to authenticated
 with check (
-  auth.jwt() ->> 'role' = 'workforce_coordinator'
+  auth.jwt() ->> 'role' in ('workforce_coordinator','admin')
 );
 
 create policy operator_assignments_update_workforce on operator_assignments
 for update
 to authenticated
-using (auth.jwt() ->> 'role' = 'workforce_coordinator')
+using (auth.jwt() ->> 'role' in ('workforce_coordinator','admin'))
 with check (
-  auth.jwt() ->> 'role' = 'workforce_coordinator'
+  auth.jwt() ->> 'role' in ('workforce_coordinator','admin')
 );
 
 create policy operator_assignments_delete_workforce on operator_assignments
 for delete
 to authenticated
-using (auth.jwt() ->> 'role' = 'workforce_coordinator');
+using (auth.jwt() ->> 'role' in ('workforce_coordinator','admin'));
 
 -- hire_requests: coordinators may read
 alter table hire_requests enable row level security;
@@ -89,7 +89,8 @@ to authenticated
 using (
   auth.jwt() ->> 'role' in (
     'plant_coordinator',
-    'workforce_coordinator'
+    'workforce_coordinator',
+    'admin'
   )
 );
 
@@ -103,7 +104,8 @@ to authenticated
 using (
   auth.jwt() ->> 'role' in (
     'plant_coordinator',
-    'workforce_coordinator'
+    'workforce_coordinator',
+    'admin'
   )
 );
 
@@ -117,7 +119,8 @@ to authenticated
 using (
   auth.jwt() ->> 'role' in (
     'plant_coordinator',
-    'workforce_coordinator'
+    'workforce_coordinator',
+    'admin'
   )
 );
 

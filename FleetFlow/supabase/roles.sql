@@ -3,7 +3,7 @@
 -- Add role column if it doesn't exist
 alter table profiles
   add column if not exists role text
-    check (role in ('contract_manager','plant_coordinator','workforce_coordinator'))
+    check (role in ('admin','contract_manager','plant_coordinator','workforce_coordinator'))
     default 'contract_manager';
 
 -- Expose role in JWT so policies can rely on auth.jwt()->>'role'

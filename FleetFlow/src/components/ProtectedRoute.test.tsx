@@ -1,10 +1,14 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, afterEach } from 'vitest'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { render, screen } from '@testing-library/react'
+import { render, screen, cleanup } from '@testing-library/react'
 import ProtectedRoute from './ProtectedRoute'
 import { AuthContext } from './auth-context'
 import type { User } from '@supabase/supabase-js'
+
+afterEach(() => {
+  cleanup()
+})
 
 describe('ProtectedRoute', () => {
   it('redirects to login when user is not authenticated', () => {
@@ -76,7 +80,29 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('Unauthorized')).toBeTruthy()
   })
 
-  it('renders loading state when auth is loading', () => {
+  
+    it('allows admin to access any route', () => {
+      render(
+        <AuthContext.Provider value={{ user: {} as User, role: 'admin', loading: false }}>
+          <MemoryRouter initialEntries={['/protected']}>
+            <Routes>
+              <Route
+                path='/protected'
+                element={
+                  <ProtectedRoute roles={['plant_coordinator']}>
+                    <div>Secret</div>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </MemoryRouter>
+        </AuthContext.Provider>,
+      )
+
+      expect(screen.getByText('Secret')).toBeTruthy()
+    })
+
+    it('renders loading state when auth is loading', () => {
     render(
       <AuthContext.Provider value={{ user: null, role: null, loading: true }}>
         <MemoryRouter initialEntries={['/protected']}>

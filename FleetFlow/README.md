@@ -1,6 +1,6 @@
 # FleetFlow
 
-FleetFlow is a role‑based civil engineering **fleet & operated plant scheduler**. It maximises **owned equipment** use before **external hires**, using a **financial‑weeks calendar** to show demand vs capacity by equipment group. Contract Managers create contracts/requests, Plant Coordinators allocate assets or raise external hires with substitution rules, and Workforce Coordinators assign operators based on tickets, availability, and proximity. Supabase/Postgres enforces availability and scoring.
+FleetFlow is a role‑based civil engineering **fleet & operated plant scheduler**. It maximises **owned equipment** use before **external hires**, using a **financial‑weeks calendar** to show demand vs capacity by equipment group. Contract Managers create contracts/requests, Plant Coordinators allocate assets or raise external hires with substitution rules, and Workforce Coordinators assign operators based on tickets, availability, and proximity, and Admins manage user accounts and roles. Supabase/Postgres enforces availability and scoring.
 
 ---
 
@@ -125,10 +125,14 @@ Open [http://localhost:5173](http://localhost:5173) (or the port Vite shows). Th
 
 * For operated requests, assign `operators` who have required tickets and no overlaps
 
+**Admins**
+
+* Manage user accounts and roles
+
 ## Authorization
 
 Roles live in the `profiles.role` column and are surfaced to clients through a custom JWT
-claim. The frontend's route guards use this value for a better UX, but these checks are
+claim. Valid roles are `admin`, `contract_manager`, `plant_coordinator`, and `workforce_coordinator`. The frontend's route guards use this value for a better UX, but these checks are
 advisory—Postgres **row level security** is the source of truth and enforces all
 authorization.
 
