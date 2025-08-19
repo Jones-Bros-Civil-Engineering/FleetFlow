@@ -122,14 +122,53 @@ using (
 );
 
 -- RLS-protected read-only views
-create or replace view vw_external_hires as
+create or replace view vw_external_hires
+with (security_barrier=true) as
 select * from external_hires;
 grant select on vw_external_hires to authenticated;
+alter view vw_external_hires enable row level security;
+create policy vw_external_hires_select on vw_external_hires
+for select
+to authenticated
+using (
+  auth.jwt() ->> 'role' = 'plant_coordinator'
+  and exists (
+    select 1 from contract_memberships cm
+    where cm.contract_id = vw_external_hires.contract_id
+    and cm.profile_id = auth.uid()
+  )
+);
 
-create or replace view vw_allocations as
+create or replace view vw_allocations
+with (security_barrier=true) as
 select * from allocations;
 grant select on vw_allocations to authenticated;
+alter view vw_allocations enable row level security;
+create policy vw_allocations_select on vw_allocations
+for select
+to authenticated
+using (
+  auth.jwt() ->> 'role' = 'plant_coordinator'
+  and exists (
+    select 1 from contract_memberships cm
+    where cm.contract_id = vw_allocations.contract_id
+    and cm.profile_id = auth.uid()
+  )
+);
 
-create or replace view vw_operator_assignments as
+create or replace view vw_operator_assignments
+with (security_barrier=true) as
 select * from operator_assignments;
 grant select on vw_operator_assignments to authenticated;
+alter view vw_operator_assignments enable row level security;
+create policy vw_operator_assignments_select on vw_operator_assignments
+for select
+to authenticated
+using (
+  auth.jwt() ->> 'role' = 'workforce_coordinator'
+  and exists (
+    select 1 from contract_memberships cm
+    where cm.contract_id = vw_operator_assignments.contract_id
+    and cm.profile_id = auth.uid()
+  )
+);

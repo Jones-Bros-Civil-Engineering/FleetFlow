@@ -23,10 +23,11 @@ const hasPostgresUser = spawnSync('id', ['postgres']).status === 0;
 
     // minimal table structure
     run('sudo', ['-u', 'postgres', 'psql', '-d', 'fleetflow_test', '-c', `
-      CREATE TABLE external_hires(id serial primary key);
-      CREATE TABLE allocations(id serial primary key);
-      CREATE TABLE operator_assignments(id serial primary key);
-      INSERT INTO external_hires DEFAULT VALUES;
+      CREATE TABLE contract_memberships(profile_id uuid, contract_id int);
+      CREATE TABLE external_hires(id serial primary key, contract_id int);
+      CREATE TABLE allocations(id serial primary key, contract_id int);
+      CREATE TABLE operator_assignments(id serial primary key, contract_id int);
+      INSERT INTO external_hires(contract_id) VALUES (1);
     `]);
 
     // apply policies
@@ -44,6 +45,19 @@ const hasPostgresUser = spawnSync('id', ['postgres']).status === 0;
     const result = spawnSync(
       'psql',
       ['-h', 'localhost', '-U', 'authenticated', '-d', 'fleetflow_test', '-c', 'select * from external_hires;'],
+      {
+        env: { ...process.env, PGPASSWORD: 'secret' },
+        encoding: 'utf8',
+      },
+    );
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('permission denied');
+  });
+
+  it('prevents view reads for unauthorised roles', () => {
+    const result = spawnSync(
+      'psql',
+      ['-h', 'localhost', '-U', 'authenticated', '-d', 'fleetflow_test', '-c', 'select * from vw_external_hires;'],
       {
         env: { ...process.env, PGPASSWORD: 'secret' },
         encoding: 'utf8',
