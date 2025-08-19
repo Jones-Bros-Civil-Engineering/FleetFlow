@@ -19,7 +19,10 @@ export default function AdminPage() {
 
   const fetchProfiles = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('profiles').select('id, email, role')
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, email, role')
+      .eq('is_active', true)
     if (error) {
       setError(error.message)
       setProfiles([])
@@ -88,7 +91,10 @@ export default function AdminPage() {
     if (!window.confirm('Delete this user?')) {
       return
     }
-    const { error } = await supabase.from('profiles').delete().eq('id', id)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_active: false })
+      .eq('id', id)
     if (error) {
       setError(error.message)
     } else {
