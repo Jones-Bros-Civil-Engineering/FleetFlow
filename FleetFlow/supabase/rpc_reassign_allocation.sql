@@ -7,11 +7,17 @@ create or replace function rpc_reassign_allocation(
   allocation_id uuid
 )
 returns setof allocations
-language sql
+language plpgsql
 as $$
-  update allocations
-     set start_date = start_date + interval '1 day',
-         end_date   = end_date + interval '1 day'
-   where id = allocation_id
-  returning *;
+begin
+  return query
+    update allocations
+       set start_date = start_date + interval '1 day',
+           end_date   = end_date + interval '1 day'
+     where id = allocation_id
+    returning *;
+exception
+  when exclusion_violation then
+    raise exception 'ALLOCATION_OVERLAP';
+end;
 $$;
