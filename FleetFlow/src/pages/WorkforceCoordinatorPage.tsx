@@ -52,8 +52,8 @@ export default function WorkforceCoordinatorPage() {
       const { error } = await supabase.from('operator_assignments').insert({
         request_id: requestId,
         operator_id: operatorId,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
+        start_date: startDate.toISOString().slice(0, 10),
+        end_date: endDate.toISOString().slice(0, 10),
       })
       if (error) {
         throw new Error(error.message)

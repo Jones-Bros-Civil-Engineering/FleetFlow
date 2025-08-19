@@ -85,8 +85,8 @@ describe('WorkforceCoordinatorPage', () => {
     expect(insertMock).toHaveBeenCalledWith({
       request_id: 'req1',
       operator_id: 'op1',
-      start_date: request.start_date.toISOString(),
-      end_date: request.end_date.toISOString(),
+      start_date: request.start_date.toISOString().slice(0, 10),
+      end_date: request.end_date.toISOString().slice(0, 10),
     })
   })
 
