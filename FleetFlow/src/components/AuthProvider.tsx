@@ -6,9 +6,11 @@ import { AuthContext } from './auth-context'
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [role, setRole] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchUser = async () => {
+      setLoading(true)
       const { data } = await supabase.auth.getUser()
       setUser(data.user)
       if (data.user) {
@@ -17,6 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setRole(null)
       }
+      setLoading(false)
     }
     fetchUser()
     const {
@@ -29,6 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  return <AuthContext.Provider value={{ user, role }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, role, loading }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 

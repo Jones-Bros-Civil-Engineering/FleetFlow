@@ -7,15 +7,19 @@ export default function ProtectedRoute({
   roles,
 }: {
   children: ReactNode
-  roles: string[]
+  roles?: string[]
 }) {
-  const { user, role } = useAuth()
+  const { user, role, loading } = useAuth()
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   if (!user) {
     return <Navigate to='/login' replace />
   }
 
-  if (!role || !roles.includes(role)) {
+  if (roles && roles.length > 0 && (!role || !roles.includes(role))) {
     return <Navigate to='/' replace />
   }
 

@@ -66,7 +66,7 @@ export const useEquipmentGroupsQuery = () =>
   })
 
 export const fetchAllocations = async (): Promise<Allocation[]> => {
-  const { data, error } = await supabase.from('allocations').select('*')
+  const { data, error } = await supabase.from('vw_allocations').select('*')
   if (error) {
     throw new Error(error.message)
   }
