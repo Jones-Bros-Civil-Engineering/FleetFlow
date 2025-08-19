@@ -88,6 +88,35 @@ create table operator_assignments (
   check (start_date <= end_date)
 );
 
+create table contract_memberships (
+  profile_id uuid not null,
+  contract_id int not null references contracts(id) on delete cascade,
+  primary key (profile_id, contract_id)
+);
+
+create table external_hires (
+  id serial primary key,
+  contract_id int not null references contracts(id) on delete cascade,
+  request_id int references hire_requests(id) on delete set null
+);
+
+create or replace function set_external_hires_contract_id()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.contract_id is null and new.request_id is not null then
+    select contract_id into new.contract_id from hire_requests where id = new.request_id;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger trg_external_hires_set_contract_id
+before insert on external_hires
+for each row
+execute function set_external_hires_contract_id();
+
 -- Views
 
 create or replace view calendar_events as
