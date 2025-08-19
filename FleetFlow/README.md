@@ -16,6 +16,7 @@ FleetFlow is a role‑based civil engineering **fleet & operated plant scheduler
 * [Running locally](#running-locally)
 * [Calendar UX](#calendar-ux)
 * [Role workflows](#role-workflows)
+* [Authorization](#authorization)
 * [APIs (DB views & RPCs)](#apis-db-views--rpcs)
 * [Deployment](#deployment)
 * [Roadmap](#roadmap)
@@ -122,6 +123,13 @@ Open [http://localhost:5173](http://localhost:5173) (or the port Vite shows). Th
 **Workforce Coordinators**
 
 * For operated requests, assign `operators` who have required tickets and no overlaps
+
+## Authorization
+
+Roles live in the `profiles.role` column and are surfaced to clients through a custom JWT
+claim. The frontend's route guards use this value for a better UX, but these checks are
+advisory—Postgres **row level security** is the source of truth and enforces all
+authorization.
 
 ## APIs (DB views & RPCs)
 
