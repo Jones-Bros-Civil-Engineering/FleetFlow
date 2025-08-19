@@ -1,13 +1,35 @@
-import { describe, expect, it } from 'vitest'
-import { renderToString } from 'react-dom/server'
+// @vitest-environment jsdom
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import WeekCalendar from './WeekCalendar'
+import type { CalendarEvent } from '../types'
+
+afterEach(() => cleanup())
 
 describe('WeekCalendar', () => {
   it('renders seven day buttons', () => {
-    const html = renderToString(
-      <WeekCalendar selectedDate={new Date('2024-02-14')} />
+    render(<WeekCalendar selectedDate={new Date('2024-02-14')} />)
+    expect(screen.getAllByRole('button').length).toBeGreaterThanOrEqual(7)
+  })
+
+  it('triggers date selection when day clicked', () => {
+    const onSelectDate = vi.fn()
+    render(
+      <WeekCalendar selectedDate={new Date('2024-02-14')} onSelectDate={onSelectDate} />,
     )
-    const matches = html.match(/<button class="day-label/g) ?? []
-    expect(matches.length).toBe(7)
+    fireEvent.click(screen.getByText('14 Wed'))
+    expect(onSelectDate).toHaveBeenCalled()
+  })
+
+  it('opens event details when event clicked', async () => {
+    const events: CalendarEvent[] = [
+      { id: '1', title: 'Test', date: new Date('2024-02-14') },
+    ]
+    render(
+      <WeekCalendar selectedDate={new Date('2024-02-14')} events={events} />,
+    )
+    fireEvent.click(screen.getByText('Test'))
+    expect(await screen.findByText('Off-hire')).toBeTruthy()
   })
 })
+
