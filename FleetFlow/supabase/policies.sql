@@ -97,6 +97,7 @@ using (
 -- calendar_events: coordinators may read
 alter table calendar_events enable row level security;
 revoke select on calendar_events from public;
+grant select on calendar_events to authenticated;
 
 create policy calendar_events_select_coordinators on calendar_events
 for select
@@ -173,5 +174,19 @@ using (
     select 1 from contract_memberships cm
     where cm.contract_id = vw_operator_assignments.contract_id
     and cm.profile_id = auth.uid()
+  )
+);
+
+-- vw_weekly_group_utilization: coordinators may read
+grant select on vw_weekly_group_utilization to authenticated;
+alter view vw_weekly_group_utilization enable row level security;
+create policy vw_weekly_group_utilization_select on vw_weekly_group_utilization
+for select
+to authenticated
+using (
+  auth.jwt() ->> 'role' in (
+    'plant_coordinator',
+    'workforce_coordinator',
+    'admin'
   )
 );
