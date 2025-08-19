@@ -151,7 +151,7 @@ describe('fetchOperatorAssignments', () => {
     })
     fromMock.mockReturnValue({ select })
     const result = await fetchOperatorAssignments()
-    expect(fromMock).toHaveBeenCalledWith('operator_assignments')
+    expect(fromMock).toHaveBeenCalledWith('vw_operator_assignments')
     expect(result).toEqual([
       {
         id: '1',

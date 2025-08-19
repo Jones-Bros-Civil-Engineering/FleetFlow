@@ -185,7 +185,7 @@ export const reassignAllocation = async (
 
 export const fetchOperatorAssignments = async (): Promise<OperatorAssignment[]> => {
   const { data, error } = await supabase
-    .from('operator_assignments')
+    .from('vw_operator_assignments')
     .select('*')
   if (error) {
     throw new Error(error.message)
