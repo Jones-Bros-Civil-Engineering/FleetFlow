@@ -120,10 +120,14 @@ export const useWeeklyGroupUtilizationQuery = () =>
 export const rankOperators = async (
   startDate: Date,
   endDate: Date,
+  siteLat: number,
+  siteLon: number,
 ): Promise<OperatorMatch[]> => {
   const { data, error } = await supabase.rpc('rpc_rank_operators', {
     req_start: startDate.toISOString().slice(0, 10),
     req_end: endDate.toISOString().slice(0, 10),
+    site_lat: siteLat,
+    site_lon: siteLon,
   })
   if (error) {
     throw new Error(error.message)

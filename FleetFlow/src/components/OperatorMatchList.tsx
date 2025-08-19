@@ -15,9 +15,15 @@ const OperatorMatchList: FC<OperatorMatchListProps> = ({
   operators,
   onAssign,
 }) => {
+  const sorted = [...operators].sort((a, b) => {
+    if (a.distance_km == null) return 1
+    if (b.distance_km == null) return -1
+    return a.distance_km - b.distance_km
+  })
+
   return (
     <ul>
-      {operators.map((o) => (
+      {sorted.map((o) => (
         <li key={o.id}>
           {o.name} – {o.distance_km?.toFixed(1) ?? 'N/A'} km
           {onAssign && (
