@@ -7,7 +7,7 @@ describe('WeekCalendar', () => {
     const html = renderToString(
       <WeekCalendar selectedDate={new Date('2024-02-14')} />
     )
-    const matches = html.match(/<button class=\"day-label/g) ?? []
+    const matches = html.match(/<button class="day-label/g) ?? []
     expect(matches.length).toBe(7)
   })
 })
