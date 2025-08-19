@@ -148,7 +148,7 @@ authorization.
 * `rpc_available_assets(group_id, start_date, end_date)`
 * `rpc_score_assets(group_id, start_date, end_date, site_lat, site_lon)` → returns ranked candidates
 * `rpc_allocate_best_asset(request_id, group_id, start_date, end_date, site_lat, site_lon)` → inserts allocation or raises `NO_INTERNAL_ASSET_AVAILABLE`
-* `rpc_rank_operators(start_date, end_date)` → lists available operators ordered by name, excluding those with overlapping assignments or unavailability
+* `rpc_rank_operators(start_date, end_date, site_lat, site_lon, weights…)` → returns available operators ordered by a weighted score of distance, future assignments, last assignment recency, and proximity to their home depot
 * `rpc_reassign_allocation(allocation_id)` → moves an allocation forward one day and errors if it overlaps
 
 ## Deployment
