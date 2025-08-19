@@ -10,9 +10,9 @@ insert into tickets (code, description) values
 insert into group_substitutions (group_id, substitute_group_id) values
   (1, 2);
 
-insert into operators (name) values
-  ('Alice'),
-  ('Bob');
+insert into operators (name, home_depot_lat, home_depot_lon) values
+  ('Alice', 0, 0),
+  ('Bob', 1, 1);
 
 insert into operator_tickets (operator_id, ticket_code) values
   (1, 'TICKET_A');

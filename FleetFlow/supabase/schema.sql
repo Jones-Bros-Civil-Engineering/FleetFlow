@@ -18,7 +18,9 @@ create table tickets (
 
 create table operators (
   id serial primary key,
-  name text not null
+  name text not null,
+  home_depot_lat double precision,
+  home_depot_lon double precision
 );
 
 create table operator_unavailability (

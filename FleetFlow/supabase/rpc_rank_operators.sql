@@ -44,13 +44,16 @@ begin
       on ou.operator_id = o.id
      and ou.start_date <= req_end
      and ou.end_date >= req_start
-    -- precompute distance when home coords exist
+    -- precompute distance when home depot coords exist using Haversine
     left join lateral (
-      select (st_distanceSphere(
-                 st_makepoint(site_lon, site_lat),
-                 st_makepoint(o.home_lon, o.home_lat)
-               ) / 1000) as distance_km
-    ) dist on (o.home_lat is not null and o.home_lon is not null)
+      select 2 * 6371 * asin(
+               sqrt(
+                 power(sin(radians(site_lat - o.home_depot_lat) / 2), 2) +
+                 cos(radians(o.home_depot_lat)) * cos(radians(site_lat)) *
+                 power(sin(radians(site_lon - o.home_depot_lon) / 2), 2)
+               )
+             ) as distance_km
+    ) dist on (o.home_depot_lat is not null and o.home_depot_lon is not null)
     -- future assignments after request end
     left join lateral (
       select count(*) as future_count
