@@ -40,6 +40,15 @@ describe('RLS policies', () => {
     )
   })
 
+  it('restricts vw_weekly_group_utilization to coordinators', () => {
+    expect(sql).toContain(
+      'alter view vw_weekly_group_utilization enable row level security',
+    )
+    expect(sql).toMatch(
+      /auth\.jwt\(\) ->> 'role' in \(\s*'plant_coordinator',\s*'workforce_coordinator',\s*'admin'\s*\)/,
+    )
+  })
+
   it('restricts equipment_groups to coordinators', () => {
     expect(sql).toContain("alter table equipment_groups enable row level security")
     expect(sql).toMatch(
