@@ -11,11 +11,17 @@ create or replace function rpc_week_starts(
 returns table (
   week_start date
 )
-language sql
+language plpgsql
 as $$
-  select generate_series(
+begin
+  if start_date > end_date then
+    raise exception 'INVALID_DATE_RANGE';
+  end if;
+
+  return query select generate_series(
     date_trunc('week', start_date),
     date_trunc('week', end_date),
     interval '1 week'
   )::date as week_start;
+end;
 $$;
