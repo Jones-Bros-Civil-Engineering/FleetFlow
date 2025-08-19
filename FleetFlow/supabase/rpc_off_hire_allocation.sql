@@ -10,6 +10,6 @@ returns void
 language sql
 as $$
   update allocations
-     set end_date = current_date
+     set end_date = greatest(start_date, current_date)
    where id = allocation_id;
 $$;

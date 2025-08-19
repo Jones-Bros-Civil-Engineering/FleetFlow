@@ -10,6 +10,10 @@ alter table allocations
     daterange(start_date, end_date, '[]') with &&
   );
 
+alter table allocations
+  add constraint allocations_date_order
+  check (start_date <= end_date);
+
 -- operator_assignments_no_overlap: prevent double-booking an operator
 alter table operator_assignments
   add constraint operator_assignments_no_overlap
@@ -20,4 +24,8 @@ alter table operator_assignments
 
 alter table operator_assignments
   add constraint operator_assignments_date_order
+  check (start_date <= end_date);
+
+alter table hire_requests
+  add constraint hire_requests_date_order
   check (start_date <= end_date);
