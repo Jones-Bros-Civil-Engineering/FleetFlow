@@ -5,6 +5,11 @@ import { resolve } from 'path'
 const sql = readFileSync(resolve(__dirname, '../../supabase/policies.sql'), 'utf8')
 
 describe('RLS policies', () => {
+  it('restricts profiles to admins', () => {
+    expect(sql).toContain('alter table profiles enable row level security')
+    expect(sql).toContain("auth.jwt() ->> 'role' = 'admin'")
+  })
+
   it('restricts external_hires to plant coordinators', () => {
     expect(sql).toContain("alter table external_hires enable row level security")
     expect(sql).toContain(
