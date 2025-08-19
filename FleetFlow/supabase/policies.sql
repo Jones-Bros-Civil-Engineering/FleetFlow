@@ -92,6 +92,7 @@ using (auth.jwt() ->> 'role' in ('workforce_coordinator','admin'));
 -- hire_requests: coordinators may read
 alter table hire_requests enable row level security;
 revoke select on hire_requests from public;
+revoke select on hire_requests from authenticated;
 
 create policy hire_requests_select_coordinators on hire_requests
 for select
@@ -123,6 +124,7 @@ using (
 -- equipment_groups: coordinators may read
 alter table equipment_groups enable row level security;
 revoke select on equipment_groups from public;
+revoke select on equipment_groups from authenticated;
 
 create policy equipment_groups_select_coordinators on equipment_groups
 for select
@@ -136,6 +138,51 @@ using (
 );
 
 -- RLS-protected read-only views
+create or replace view vw_equipment_groups
+with (security_barrier=true) as
+select
+  id::text as id,
+  name
+from equipment_groups;
+grant select on vw_equipment_groups to authenticated;
+alter view vw_equipment_groups enable row level security;
+create policy vw_equipment_groups_select on vw_equipment_groups
+for select
+to authenticated
+using (
+  auth.jwt() ->> 'role' in (
+    'plant_coordinator',
+    'workforce_coordinator',
+    'admin'
+  )
+);
+
+create or replace view vw_hire_requests
+with (security_barrier=true) as
+select
+  id::text as id,
+  contract_id::text as contract_id,
+  group_id::text as group_id,
+  start_date,
+  end_date,
+  quantity,
+  operated,
+  site_lat,
+  site_lon
+from hire_requests;
+grant select on vw_hire_requests to authenticated;
+alter view vw_hire_requests enable row level security;
+create policy vw_hire_requests_select on vw_hire_requests
+for select
+to authenticated
+using (
+  auth.jwt() ->> 'role' in (
+    'plant_coordinator',
+    'workforce_coordinator',
+    'admin'
+  )
+);
+
 create or replace view vw_external_hires
 with (security_barrier=true) as
 select * from external_hires;

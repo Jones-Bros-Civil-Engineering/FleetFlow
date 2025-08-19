@@ -23,6 +23,8 @@ import {
   useEventsQuery,
   fetchEquipmentGroups,
   useEquipmentGroupsQuery,
+  fetchRequests,
+  useRequestsQuery,
   fetchOperatorAssignments,
   useOperatorAssignmentsQuery,
 } from './queries'
@@ -105,6 +107,17 @@ describe('useEquipmentGroupsQuery', () => {
 describe('fetchEquipmentGroups', () => {
   beforeEach(() => fromMock.mockReset())
 
+  it('returns parsed groups', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: [{ id: '1', name: 'Grp' }],
+      error: null,
+    })
+    fromMock.mockReturnValue({ select })
+    const result = await fetchEquipmentGroups()
+    expect(fromMock).toHaveBeenCalledWith('vw_equipment_groups')
+    expect(result).toEqual([{ id: '1', name: 'Grp' }])
+  })
+
   it('throws on fetch error', async () => {
     const select = vi.fn().mockResolvedValue({
       data: null,
@@ -112,7 +125,73 @@ describe('fetchEquipmentGroups', () => {
     })
     fromMock.mockReturnValue({ select })
     await expect(fetchEquipmentGroups()).rejects.toThrow('oops')
-    expect(fromMock).toHaveBeenCalledWith('equipment_groups')
+    expect(fromMock).toHaveBeenCalledWith('vw_equipment_groups')
+  })
+})
+
+describe('useRequestsQuery', () => {
+  beforeEach(() => (useQuery as Mock).mockReset())
+
+  it('calls useQuery with requests key and fetcher', () => {
+    const fakeResult = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fakeResult)
+
+    const result = useRequestsQuery()
+
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['requests'],
+      queryFn: fetchRequests,
+    })
+    expect(result).toBe(fakeResult)
+  })
+})
+
+describe('fetchRequests', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('returns parsed requests', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: [
+        {
+          id: '1',
+          contract_id: '1',
+          group_id: '2',
+          start_date: '2024-01-01',
+          end_date: '2024-01-02',
+          quantity: 1,
+          operated: false,
+          site_lat: 0,
+          site_lon: 0,
+        },
+      ],
+      error: null,
+    })
+    fromMock.mockReturnValue({ select })
+    const result = await fetchRequests()
+    expect(fromMock).toHaveBeenCalledWith('vw_hire_requests')
+    expect(result).toEqual([
+      {
+        id: '1',
+        contract_id: '1',
+        group_id: '2',
+        start_date: new Date('2024-01-01'),
+        end_date: new Date('2024-01-02'),
+        quantity: 1,
+        operated: false,
+        site_lat: 0,
+        site_lon: 0,
+      },
+    ])
+  })
+
+  it('throws on fetch error', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'bad' },
+    })
+    fromMock.mockReturnValue({ select })
+    await expect(fetchRequests()).rejects.toThrow('bad')
+    expect(fromMock).toHaveBeenCalledWith('vw_hire_requests')
   })
 })
 

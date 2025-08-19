@@ -191,3 +191,24 @@ join generate_series(
 ) as gs(week_start) on true
 group by gs.week_start, a.contract_id, a.group_id;
 
+create or replace view vw_equipment_groups
+with (security_barrier=true) as
+select
+  id::text as id,
+  name
+from equipment_groups;
+
+create or replace view vw_hire_requests
+with (security_barrier=true) as
+select
+  id::text as id,
+  contract_id::text as contract_id,
+  group_id::text as group_id,
+  start_date,
+  end_date,
+  quantity,
+  operated,
+  site_lat,
+  site_lon
+from hire_requests;
+
