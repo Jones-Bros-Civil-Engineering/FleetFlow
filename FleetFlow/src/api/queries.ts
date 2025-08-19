@@ -8,6 +8,8 @@ import {
   RequestSchema,
   WeeklyGroupUtilizationSchema,
   AssetScoreSchema,
+  OperatorMatchSchema,
+  OperatorAssignmentSchema,
   type Example,
   type CalendarEvent,
   type EquipmentGroup,
@@ -15,6 +17,8 @@ import {
   type Request,
   type WeeklyGroupUtilization,
   type AssetScore,
+  type OperatorMatch,
+  type OperatorAssignment,
 } from '../types'
 
 export const fetchExample = async (): Promise<Example[]> => {
@@ -111,4 +115,34 @@ export const useWeeklyGroupUtilizationQuery = () =>
   useQuery<WeeklyGroupUtilization[], Error>({
     queryKey: ['weekly-group-utilization'],
     queryFn: fetchWeeklyGroupUtilization,
+  })
+
+export const rankOperators = async (
+  startDate: Date,
+  endDate: Date,
+): Promise<OperatorMatch[]> => {
+  const { data, error } = await supabase.rpc('rpc_rank_operators', {
+    req_start: startDate.toISOString().slice(0, 10),
+    req_end: endDate.toISOString().slice(0, 10),
+  })
+  if (error) {
+    throw new Error(error.message)
+  }
+  return OperatorMatchSchema.array().parse(data ?? [])
+}
+
+export const fetchOperatorAssignments = async (): Promise<OperatorAssignment[]> => {
+  const { data, error } = await supabase
+    .from('operator_assignments')
+    .select('*')
+  if (error) {
+    throw new Error(error.message)
+  }
+  return OperatorAssignmentSchema.array().parse(data ?? [])
+}
+
+export const useOperatorAssignmentsQuery = () =>
+  useQuery<OperatorAssignment[], Error>({
+    queryKey: ['operator-assignments'],
+    queryFn: fetchOperatorAssignments,
   })
