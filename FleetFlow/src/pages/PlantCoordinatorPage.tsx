@@ -18,6 +18,8 @@ export default function PlantCoordinatorPage() {
   const [scoringId, setScoringId] = useState<string | null>(null)
   const [scores, setScores] = useState<Record<string, AssetScore[]>>({})
   const [showOpenOnly, setShowOpenOnly] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [errorId, setErrorId] = useState<string | null>(null)
 
   const getRemaining = (r: Request) => {
     const count = allocations?.filter((a) => a.request_id === r.id).length ?? 0
@@ -55,7 +57,7 @@ export default function PlantCoordinatorPage() {
                 )
                 if (subError) {
                   if (subError.message !== 'NO_INTERNAL_ASSET_AVAILABLE') {
-                    throw new Error(friendlyErrorMessage(subError.message))
+                    throw new Error(subError.message)
                   }
                 } else {
                   internalCount++
@@ -67,12 +69,12 @@ export default function PlantCoordinatorPage() {
               .from('external_hires')
               .insert({ request_id: request.id })
             if (hireError) {
-              throw new Error(friendlyErrorMessage(hireError.message))
+              throw new Error(hireError.message)
             }
             externalCount++
             continue
           }
-          throw new Error(friendlyErrorMessage(error.message))
+          throw new Error(error.message)
         }
         internalCount++
       }
@@ -91,14 +93,30 @@ export default function PlantCoordinatorPage() {
     },
   })
 
-  const handleAllocate = (request: Request) => {
+  const handleAllocate = async (request: Request) => {
     setActiveId(request.id)
-    allocationMutation.mutate(request)
+    setErrorId(request.id)
+    setErrorMessage(null)
+    try {
+      await allocationMutation.mutateAsync(request)
+    } catch (err) {
+      const message =
+        err instanceof Error ? friendlyErrorMessage(err.message) : String(err)
+      setErrorMessage(message)
+    }
   }
 
-  const handleScore = (request: Request) => {
+  const handleScore = async (request: Request) => {
     setScoringId(request.id)
-    scoreMutation.mutate(request)
+    setErrorId(request.id)
+    setErrorMessage(null)
+    try {
+      await scoreMutation.mutateAsync(request)
+    } catch (err) {
+      const message =
+        err instanceof Error ? friendlyErrorMessage(err.message) : String(err)
+      setErrorMessage(message)
+    }
   }
 
   if (isLoading) {
@@ -163,11 +181,8 @@ export default function PlantCoordinatorPage() {
                 <div>No assets available</div>
               )
             )}
-            {scoreMutation.isError && scoringId === r.id && (
-              <div>Error scoring assets: {scoreMutation.error.message}</div>
-            )}
-            {allocationMutation.isError && activeId === r.id && (
-              <div>Error allocating asset: {(allocationMutation.error as Error).message}</div>
+            {errorMessage && errorId === r.id && (
+              <div role="alert">{errorMessage}</div>
             )}
             {allocationMutation.isSuccess && activeId === r.id && (
               <div>
