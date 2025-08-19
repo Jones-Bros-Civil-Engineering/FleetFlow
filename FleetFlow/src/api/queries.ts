@@ -131,6 +131,29 @@ export const rankOperators = async (
   return OperatorMatchSchema.array().parse(data ?? [])
 }
 
+export const offHireAllocation = async (
+  allocationId: string,
+): Promise<void> => {
+  const { error } = await supabase.rpc('rpc_off_hire_allocation', {
+    allocation_id: allocationId,
+  })
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const reassignAllocation = async (
+  allocationId: string,
+): Promise<CalendarEvent> => {
+  const { data, error } = await supabase.rpc('rpc_reassign_allocation', {
+    allocation_id: allocationId,
+  })
+  if (error) {
+    throw new Error(error.message)
+  }
+  return CalendarEventSchema.parse(data)
+}
+
 export const fetchOperatorAssignments = async (): Promise<OperatorAssignment[]> => {
   const { data, error } = await supabase
     .from('operator_assignments')
