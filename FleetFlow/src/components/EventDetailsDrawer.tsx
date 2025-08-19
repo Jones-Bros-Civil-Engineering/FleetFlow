@@ -1,5 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
+import { useState } from 'react'
 import type { CalendarEvent } from '../types'
+import { friendlyErrorMessage } from '../utils/errors'
 import './week-calendar.css'
 
 export interface EventDetailsDrawerProps {
@@ -17,6 +19,31 @@ export default function EventDetailsDrawer({
   onOffHire,
   onReassign,
 }: EventDetailsDrawerProps) {
+  const [error, setError] = useState<string | null>(null)
+
+  const handleOffHire = async () => {
+    if (!event || !onOffHire) return
+    try {
+      setError(null)
+      await onOffHire(event)
+    } catch (err) {
+      const message =
+        err instanceof Error ? friendlyErrorMessage(err.message) : String(err)
+      setError(message)
+    }
+  }
+
+  const handleReassign = async () => {
+    if (!event || !onReassign) return
+    try {
+      setError(null)
+      await onReassign(event)
+    } catch (err) {
+      const message =
+        err instanceof Error ? friendlyErrorMessage(err.message) : String(err)
+      setError(message)
+    }
+  }
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
@@ -35,13 +62,10 @@ export default function EventDetailsDrawer({
             </div>
           )}
           <div className='drawer-actions'>
-            <button onClick={() => event && onOffHire?.(event)}>
-              Off-hire
-            </button>
-            <button onClick={() => event && onReassign?.(event)}>
-              Reassign
-            </button>
+            <button onClick={handleOffHire}>Off-hire</button>
+            <button onClick={handleReassign}>Reassign</button>
           </div>
+          {error && <div role='alert'>{error}</div>}
           <Dialog.Close className='drawer-close'>Close</Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>

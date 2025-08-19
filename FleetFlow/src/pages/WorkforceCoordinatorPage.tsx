@@ -19,6 +19,7 @@ export default function WorkforceCoordinatorPage() {
   const [assigningId, setAssigningId] = useState<string | null>(null)
   const [matches, setMatches] = useState<Record<string, OperatorMatch[]>>({})
   const [assignError, setAssignError] = useState<string | null>(null)
+  const [rankError, setRankError] = useState<string | null>(null)
 
   const rankMutation = useMutation({
     mutationFn: (request: Request) =>
@@ -47,14 +48,7 @@ export default function WorkforceCoordinatorPage() {
       startDate: Date
       endDate: Date
     }) => {
-      try {
-        await validateOperatorAssignment(groupId, operatorId)
-      } catch (err) {
-        if (err instanceof Error) {
-          throw new Error(friendlyErrorMessage(err.message))
-        }
-        throw err
-      }
+      await validateOperatorAssignment(groupId, operatorId)
       const { error } = await supabase.from('operator_assignments').insert({
         request_id: requestId,
         operator_id: operatorId,
@@ -62,15 +56,11 @@ export default function WorkforceCoordinatorPage() {
         end_date: endDate.toISOString(),
       })
       if (error) {
-        throw new Error(friendlyErrorMessage(error.message))
+        throw new Error(error.message)
       }
     },
     onSuccess: () => {
-      setAssignError(null)
       queryClient.invalidateQueries({ queryKey: ['operator-assignments'] })
-    },
-    onError: (err: Error) => {
-      setAssignError(err.message || 'Error assigning operator')
     },
   })
 
@@ -81,21 +71,34 @@ export default function WorkforceCoordinatorPage() {
     return count < r.quantity
   })
 
-  const handleRank = (r: Request) => {
+  const handleRank = async (r: Request) => {
     setRankingId(r.id)
-    rankMutation.mutate(r)
+    setRankError(null)
+    try {
+      await rankMutation.mutateAsync(r)
+    } catch (err) {
+      const message =
+        err instanceof Error ? friendlyErrorMessage(err.message) : String(err)
+      setRankError(message)
+    }
   }
 
-  const handleAssign = (r: Request, operatorId: string) => {
+  const handleAssign = async (r: Request, operatorId: string) => {
     setAssigningId(r.id)
     setAssignError(null)
-    assignMutation.mutate({
-      requestId: r.id,
-      groupId: r.group_id,
-      operatorId,
-      startDate: r.start_date,
-      endDate: r.end_date,
-    })
+    try {
+      await assignMutation.mutateAsync({
+        requestId: r.id,
+        groupId: r.group_id,
+        operatorId,
+        startDate: r.start_date,
+        endDate: r.end_date,
+      })
+    } catch (err) {
+      const message =
+        err instanceof Error ? friendlyErrorMessage(err.message) : String(err)
+      setAssignError(message)
+    }
   }
 
   if (isLoading) {
@@ -137,7 +140,10 @@ export default function WorkforceCoordinatorPage() {
                 onAssign={(opId) => handleAssign(r, String(opId))}
               />
             )}
-            {assignMutation.isError && assigningId === r.id && (
+            {rankError && rankingId === r.id && (
+              <div role="alert">{rankError}</div>
+            )}
+            {assignError && assigningId === r.id && (
               <div role="alert">{assignError}</div>
             )}
             {assignMutation.isSuccess && assigningId === r.id && (
