@@ -1,3 +1,13 @@
+-- profiles: only admins may access
+alter table profiles enable row level security;
+revoke all on profiles from public;
+
+create policy profiles_admin_all on profiles
+for all
+to authenticated
+using (auth.jwt() ->> 'role' = 'admin')
+with check (auth.jwt() ->> 'role' = 'admin');
+
 -- Row level security policies for coordinator tables
 
 -- external_hires: only plant coordinators may modify
