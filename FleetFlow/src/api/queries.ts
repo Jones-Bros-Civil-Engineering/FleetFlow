@@ -7,6 +7,7 @@ import {
   AllocationSchema,
   RequestSchema,
   WeeklyGroupUtilizationSchema,
+  WeekStartSchema,
   AssetScoreSchema,
   OperatorMatchSchema,
   OperatorAssignmentSchema,
@@ -16,6 +17,7 @@ import {
   type Allocation,
   type Request,
   type WeeklyGroupUtilization,
+  type WeekStart,
   type AssetScore,
   type OperatorMatch,
   type OperatorAssignment,
@@ -115,6 +117,29 @@ export const useWeeklyGroupUtilizationQuery = () =>
   useQuery<WeeklyGroupUtilization[], Error>({
     queryKey: ['weekly-group-utilization'],
     queryFn: fetchWeeklyGroupUtilization,
+  })
+
+export const fetchWeekStarts = async (
+  startDate: Date,
+  endDate: Date,
+): Promise<WeekStart[]> => {
+  const { data, error } = await supabase.rpc('rpc_week_starts', {
+    start_date: startDate.toISOString().slice(0, 10),
+    end_date: endDate.toISOString().slice(0, 10),
+  })
+  if (error) {
+    throw new Error(error.message)
+  }
+  return WeekStartSchema.array().parse(data ?? [])
+}
+
+export const useWeekStartsQuery = (
+  startDate: Date,
+  endDate: Date,
+) =>
+  useQuery<WeekStart[], Error>({
+    queryKey: ['week-starts', startDate, endDate],
+    queryFn: () => fetchWeekStarts(startDate, endDate),
   })
 
 export const rankOperators = async (

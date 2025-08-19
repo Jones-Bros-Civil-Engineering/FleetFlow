@@ -41,7 +41,6 @@ vi.mock('../../utils/validation', () => ({
 }))
 
 import WorkforceCoordinatorPage from '../WorkforceCoordinatorPage'
-import { supabase } from '../../lib/supabase'
 import { rankOperators } from '../../api/queries'
 
 afterEach(() => cleanup())

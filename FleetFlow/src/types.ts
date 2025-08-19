@@ -55,6 +55,11 @@ export const WeeklyGroupUtilizationSchema = z.object({
 })
 export type WeeklyGroupUtilization = z.infer<typeof WeeklyGroupUtilizationSchema>
 
+export const WeekStartSchema = z.object({
+  week_start: z.coerce.date(),
+})
+export type WeekStart = z.infer<typeof WeekStartSchema>
+
 export const AssetScoreSchema = z.object({
   asset_code: z.string(),
   score: z.number(),
