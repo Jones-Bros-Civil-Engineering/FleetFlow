@@ -8,4 +8,10 @@ describe('roles', () => {
   it('includes admin in profiles role check', () => {
     expect(sql).toContain("'admin','contract_manager','plant_coordinator','workforce_coordinator'")
   })
+
+  it('adds is_active column for soft deletes', () => {
+    expect(sql).toContain(
+      'add column if not exists is_active boolean default true',
+    )
+  })
 })

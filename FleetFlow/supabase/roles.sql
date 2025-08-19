@@ -1,5 +1,9 @@
 -- Roles stored in profiles and surfaced via JWT + RPC
 
+-- Add soft-delete column to profiles
+alter table profiles
+  add column if not exists is_active boolean default true;
+
 -- Add role column if it doesn't exist
 alter table profiles
   add column if not exists role text
