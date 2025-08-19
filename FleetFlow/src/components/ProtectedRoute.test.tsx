@@ -52,14 +52,14 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('Secret')).toBeTruthy()
   })
 
-  it('redirects to home when role does not match', () => {
+  it('redirects to unauthorized when role does not match', () => {
     render(
       <AuthContext.Provider
         value={{ user: {} as User, role: 'driver', loading: false }}
       >
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>
-            <Route path='/' element={<div>Home</div>} />
+            <Route path='/unauthorized' element={<div>Unauthorized</div>} />
             <Route
               path='/protected'
               element={
@@ -73,7 +73,7 @@ describe('ProtectedRoute', () => {
       </AuthContext.Provider>
     )
 
-    expect(screen.getByText('Home')).toBeTruthy()
+    expect(screen.getByText('Unauthorized')).toBeTruthy()
   })
 })
 
