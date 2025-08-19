@@ -73,3 +73,21 @@ export const OperatorAssignmentSchema = z.object({
   end_date: z.coerce.date(),
 })
 export type OperatorAssignment = z.infer<typeof OperatorAssignmentSchema>
+
+export const GroupSubstitutionSchema = z.object({
+  group_id: z.string(),
+  substitute_group_id: z.string(),
+})
+export type GroupSubstitution = z.infer<typeof GroupSubstitutionSchema>
+
+export const OperatorTicketSchema = z.object({
+  operator_id: z.string(),
+  ticket_code: z.string(),
+})
+export type OperatorTicket = z.infer<typeof OperatorTicketSchema>
+
+export const GroupRequiredTicketSchema = z.object({
+  group_id: z.string(),
+  ticket_code: z.string(),
+})
+export type GroupRequiredTicket = z.infer<typeof GroupRequiredTicketSchema>

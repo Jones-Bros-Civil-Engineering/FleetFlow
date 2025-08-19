@@ -8,6 +8,7 @@ import {
 import type { Request, OperatorMatch } from '../types'
 import { supabase } from '../lib/supabase'
 import OperatorMatchList from '../components/OperatorMatchList'
+import { validateOperatorAssignment } from '../utils/validation'
 
 export default function WorkforceCoordinatorPage() {
   const { data: requests, isLoading, error } = useRequestsQuery()
@@ -28,15 +29,18 @@ export default function WorkforceCoordinatorPage() {
   const assignMutation = useMutation({
     mutationFn: async ({
       requestId,
+      groupId,
       operatorId,
       startDate,
       endDate,
     }: {
       requestId: string
+      groupId: string
       operatorId: string
       startDate: Date
       endDate: Date
     }) => {
+      await validateOperatorAssignment(groupId, operatorId)
       const { error } = await supabase.from('operator_assignments').insert({
         request_id: requestId,
         operator_id: operatorId,
@@ -68,6 +72,7 @@ export default function WorkforceCoordinatorPage() {
     setAssigningId(r.id)
     assignMutation.mutate({
       requestId: r.id,
+      groupId: r.group_id,
       operatorId,
       startDate: r.start_date,
       endDate: r.end_date,
