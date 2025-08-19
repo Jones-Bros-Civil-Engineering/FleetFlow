@@ -1,4 +1,7 @@
 -- Core tables
+-- Date range tables include CHECK (start_date <= end_date) directly in their
+-- definitions. Any future date range tables should follow this pattern rather
+-- than using constraints.sql.
 
 create table equipment_groups (
   id serial primary key,
