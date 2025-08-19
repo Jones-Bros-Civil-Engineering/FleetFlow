@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { getWeekDays } from '../lib/weeks'
 import type {
   CalendarEvent,
   EquipmentGroup,
   WeeklyGroupUtilization,
 } from '../types'
+import EventDetailsDrawer from './EventDetailsDrawer'
 import './week-calendar.css'
 
 export interface WeekCalendarProps {
@@ -14,6 +16,8 @@ export interface WeekCalendarProps {
   onSelectDate?: (date: Date) => void
   onPrevWeek?: () => void
   onNextWeek?: () => void
+  onOffHire?: (event: CalendarEvent) => void
+  onReassign?: (event: CalendarEvent) => void
 }
 
 export default function WeekCalendar({
@@ -24,9 +28,14 @@ export default function WeekCalendar({
   onSelectDate,
   onPrevWeek,
   onNextWeek,
+  onOffHire,
+  onReassign,
 }: WeekCalendarProps) {
   const days = getWeekDays(selectedDate)
   const weekStart = days[0]
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  )
 
   return (
     <div>
@@ -59,9 +68,13 @@ export default function WeekCalendar({
                   {label}
                 </button>
                 {dayEvents.map((ev) => (
-                  <div key={ev.id} className='event'>
+                  <button
+                    key={ev.id}
+                    className='event'
+                    onClick={() => setSelectedEvent(ev)}
+                  >
                     {ev.title}
-                  </div>
+                  </button>
                 ))}
               </div>
             )
@@ -101,6 +114,13 @@ export default function WeekCalendar({
           </tbody>
         </table>
       )}
+      <EventDetailsDrawer
+        event={selectedEvent}
+        open={selectedEvent !== null}
+        onClose={() => setSelectedEvent(null)}
+        onOffHire={onOffHire}
+        onReassign={onReassign}
+      />
     </div>
   )
 }
