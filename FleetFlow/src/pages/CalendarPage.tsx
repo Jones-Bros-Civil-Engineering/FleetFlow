@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import WeekCalendar from '../components/WeekCalendar'
 import {
   useEventsQuery,
@@ -6,18 +6,26 @@ import {
   useAllocationsQuery,
   useRequestsQuery,
   useWeeklyGroupUtilizationQuery,
+  offHireAllocation,
+  reassignAllocation,
 } from '../api/queries'
+import type { CalendarEvent } from '../types'
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [siteFilter, setSiteFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [operatedFilter, setOperatedFilter] = useState('all')
-  const { data: events, isLoading, error } = useEventsQuery()
+  const { data: eventsData, isLoading, error } = useEventsQuery()
   const { data: groups } = useEquipmentGroupsQuery()
   const { data: allocations } = useAllocationsQuery()
   const { data: requests } = useRequestsQuery()
   const { data: utilization } = useWeeklyGroupUtilizationQuery()
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+
+  useEffect(() => {
+    setEvents(eventsData ?? [])
+  }, [eventsData])
 
   if (isLoading) {
     return <div>Loading events...</div>
@@ -33,25 +41,36 @@ export default function CalendarPage() {
     setSelectedDate(new Date(selectedDate.getTime() + 7 * 24 * 60 * 60 * 1000))
 
   const sites = Array.from(
-    new Set(events?.map((e) => e.site).filter((s): s is string => Boolean(s)))
+    new Set(events.map((e) => e.site).filter((s): s is string => Boolean(s)))
   )
   const statuses = Array.from(
     new Set(
       events
-        ?.map((e) => e.contract_status)
+        .map((e) => e.contract_status)
         .filter((s): s is string => Boolean(s)),
     ),
   )
 
-  const filteredEvents =
-    events?.filter((ev) => {
-      if (siteFilter !== 'all' && ev.site !== siteFilter) return false
-      if (statusFilter !== 'all' && ev.contract_status !== statusFilter)
-        return false
-      if (operatedFilter === 'operated' && !ev.operated) return false
-      if (operatedFilter === 'non-operated' && ev.operated) return false
-      return true
-    }) ?? []
+  const filteredEvents = events.filter((ev) => {
+    if (siteFilter !== 'all' && ev.site !== siteFilter) return false
+    if (statusFilter !== 'all' && ev.contract_status !== statusFilter)
+      return false
+    if (operatedFilter === 'operated' && !ev.operated) return false
+    if (operatedFilter === 'non-operated' && ev.operated) return false
+    return true
+  })
+
+  const handleOffHire = async (event: CalendarEvent) => {
+    await offHireAllocation(event.id)
+    setEvents((prev) => prev.filter((e) => e.id !== event.id))
+  }
+
+  const handleReassign = async (event: CalendarEvent) => {
+    const updated = await reassignAllocation(event.id)
+    setEvents((prev) =>
+      prev.map((e) => (e.id === event.id ? updated : e)),
+    )
+  }
 
   return (
     <div>
@@ -116,6 +135,8 @@ export default function CalendarPage() {
         onSelectDate={setSelectedDate}
         onPrevWeek={handlePrevWeek}
         onNextWeek={handleNextWeek}
+        onOffHire={handleOffHire}
+        onReassign={handleReassign}
       />
     </div>
   )
