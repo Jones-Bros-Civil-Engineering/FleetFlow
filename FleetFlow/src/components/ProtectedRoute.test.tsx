@@ -16,7 +16,7 @@ describe('ProtectedRoute', () => {
             <Route
               path='/protected'
               element={
-                <ProtectedRoute>
+                <ProtectedRoute roles={['plant_coordinator']}>
                   <div>Secret</div>
                 </ProtectedRoute>
               }
@@ -50,6 +50,30 @@ describe('ProtectedRoute', () => {
     )
 
     expect(screen.getByText('Secret')).toBeTruthy()
+  })
+
+  it('redirects to home when role does not match', () => {
+    render(
+      <AuthContext.Provider
+        value={{ user: { user_metadata: { role: 'driver' } } as unknown as User }}
+      >
+        <MemoryRouter initialEntries={['/protected']}>
+          <Routes>
+            <Route path='/' element={<div>Home</div>} />
+            <Route
+              path='/protected'
+              element={
+                <ProtectedRoute roles={['plant_coordinator']}>
+                  <div>Secret</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>
+    )
+
+    expect(screen.getByText('Home')).toBeTruthy()
   })
 })
 

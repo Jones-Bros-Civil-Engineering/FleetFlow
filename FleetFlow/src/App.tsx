@@ -15,7 +15,7 @@ export default function App() {
           <Route
             path='/'
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['plant_coordinator', 'workforce_coordinator']}>
                 <CalendarPage />
               </ProtectedRoute>
             }
