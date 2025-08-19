@@ -36,3 +36,30 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: FleetFlow
+
+  e2e:
+    runs-on: ubuntu-latest
+    # TODO: Enable this job once a seeded ephemeral database is available
+    if: ${{ false }}
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: FleetFlow
+
+      # Placeholder for provisioning a seeded ephemeral database
+      - name: Provision database
+        run: echo "Ephemeral database setup placeholder"
+
+      - name: Run end-to-end tests
+        run: npm run test:e2e
+        working-directory: FleetFlow
