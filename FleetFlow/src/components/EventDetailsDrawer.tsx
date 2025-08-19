@@ -27,6 +27,11 @@ export default function EventDetailsDrawer({
             <div className='drawer-body'>
               <p>{event.title}</p>
               <p>{event.date.toDateString()}</p>
+              {event.asset_code && <p>Asset: {event.asset_code}</p>}
+              {event.operator_name && <p>Operator: {event.operator_name}</p>}
+              {event.contract_status && (
+                <p>Status: {event.contract_status}</p>
+              )}
             </div>
           )}
           <div className='drawer-actions'>
