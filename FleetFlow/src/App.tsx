@@ -2,18 +2,42 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import CalendarPage from './pages/CalendarPage'
 import PlantCoordinatorPage from './pages/PlantCoordinatorPage'
 import WorkforceCoordinatorPage from './pages/WorkforceCoordinatorPage'
+import LoginPage from './pages/LoginPage'
+import ProtectedRoute from './components/ProtectedRoute'
+import { AuthProvider } from './components/AuthProvider'
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<CalendarPage />} />
-        <Route path="/plant-coordinator" element={<PlantCoordinatorPage />} />
-        <Route
-          path="/workforce-coordinator"
-          element={<WorkforceCoordinatorPage />}
-        />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/login' element={<LoginPage />} />
+          <Route
+            path='/'
+            element={
+              <ProtectedRoute>
+                <CalendarPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/plant-coordinator'
+            element={
+              <ProtectedRoute roles={['plant_coordinator']}>
+                <PlantCoordinatorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/workforce-coordinator'
+            element={
+              <ProtectedRoute roles={['workforce_coordinator']}>
+                <WorkforceCoordinatorPage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
