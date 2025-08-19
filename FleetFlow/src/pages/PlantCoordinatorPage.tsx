@@ -15,30 +15,41 @@ export default function PlantCoordinatorPage() {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [scoringId, setScoringId] = useState<string | null>(null)
   const [scores, setScores] = useState<Record<string, AssetScore[]>>({})
+  const [showOpenOnly, setShowOpenOnly] = useState(true)
 
-  const openRequests = requests?.filter((r) => {
+  const getRemaining = (r: Request) => {
     const count = allocations?.filter((a) => a.request_id === r.id).length ?? 0
-    return count < r.quantity
-  })
+    return r.quantity - count
+  }
+
+  const openRequests = requests?.filter((r) => getRemaining(r) > 0)
+  const filteredRequests = showOpenOnly ? openRequests : requests
 
   const allocationMutation = useMutation({
-    mutationFn: async (requestId: string) => {
-      const { error } = await supabase.rpc('rpc_allocate_best_asset', {
-        request_id: requestId,
-      })
-      if (error) {
-        if (error.message === 'NO_INTERNAL_ASSET_AVAILABLE') {
-          const { error: hireError } = await supabase
-            .from('external_hires')
-            .insert({ request_id: requestId })
-          if (hireError) {
-            throw new Error(hireError.message)
+    mutationFn: async (request: Request) => {
+      const remaining = getRemaining(request)
+      let internalCount = 0
+      let externalCount = 0
+      for (let i = 0; i < remaining; i++) {
+        const { error } = await supabase.rpc('rpc_allocate_best_asset', {
+          request_id: request.id,
+        })
+        if (error) {
+          if (error.message === 'NO_INTERNAL_ASSET_AVAILABLE') {
+            const { error: hireError } = await supabase
+              .from('external_hires')
+              .insert({ request_id: request.id })
+            if (hireError) {
+              throw new Error(hireError.message)
+            }
+            externalCount++
+            continue
           }
-          return { external: true }
+          throw new Error(error.message)
         }
-        throw new Error(error.message)
+        internalCount++
       }
-      return { external: false }
+      return { internalCount, externalCount }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['requests'] })
@@ -53,9 +64,9 @@ export default function PlantCoordinatorPage() {
     },
   })
 
-  const handleAllocate = (id: string) => {
-    setActiveId(id)
-    allocationMutation.mutate(id)
+  const handleAllocate = (request: Request) => {
+    setActiveId(request.id)
+    allocationMutation.mutate(request)
   }
 
   const handleScore = (request: Request) => {
@@ -74,11 +85,20 @@ export default function PlantCoordinatorPage() {
   return (
     <div>
       <h1>Plant Coordinator</h1>
+      <label>
+        <input
+          type="checkbox"
+          checked={showOpenOnly}
+          onChange={(e) => setShowOpenOnly(e.target.checked)}
+        />
+        {' '}Show open requests only
+      </label>
       <ul>
-        {openRequests?.map((r) => (
+        {filteredRequests?.map((r) => (
           <li key={r.id}>
             <div>
               <strong>Contract {r.contract_id}</strong> – Group {r.group_id} – {r.start_date.toLocaleDateString()} to {r.end_date.toLocaleDateString()} – Qty {r.quantity}
+              {showOpenOnly && ` (remaining: ${getRemaining(r)})`}
             </div>
             <div>
               <button
@@ -88,34 +108,53 @@ export default function PlantCoordinatorPage() {
                 {scoreMutation.isPending && scoringId === r.id ? 'Scoring...' : 'Score Assets'}
               </button>
               <button
-                onClick={() => handleAllocate(r.id)}
+                onClick={() => handleAllocate(r)}
                 disabled={allocationMutation.isPending && activeId === r.id}
               >
-                {allocationMutation.isPending && activeId === r.id ? 'Allocating...' : 'Allocate Asset'}
+                {allocationMutation.isPending && activeId === r.id ? 'Allocating...' : 'Allocate Assets'}
               </button>
             </div>
             {scores[r.id] && (
-              <ul>
-                {scores[r.id].map((s) => (
-                  <li key={s.asset_code}>
-                    {s.asset_code} – {s.score.toFixed(2)}
-                  </li>
-                ))}
-              </ul>
+              scores[r.id].length > 0 ? (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Asset</th>
+                      <th>Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {scores[r.id].map((s) => (
+                      <tr key={s.asset_code}>
+                        <td>{s.asset_code}</td>
+                        <td>{s.score.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div>No assets available</div>
+              )
+            )}
+            {scoreMutation.isError && scoringId === r.id && (
+              <div>Error scoring assets: {scoreMutation.error.message}</div>
             )}
             {allocationMutation.isError && activeId === r.id && (
-              <div>Error allocating asset</div>
+              <div>Error allocating asset: {(allocationMutation.error as Error).message}</div>
             )}
             {allocationMutation.isSuccess && activeId === r.id && (
               <div>
-                {allocationMutation.data?.external
-                  ? 'No internal asset available – external hire created.'
-                  : 'Asset allocated successfully!'}
+                {allocationMutation.data.internalCount > 0 && (
+                  <div>{allocationMutation.data.internalCount} asset(s) allocated internally.</div>
+                )}
+                {allocationMutation.data.externalCount > 0 && (
+                  <div>{allocationMutation.data.externalCount} external hire(s) created.</div>
+                )}
               </div>
             )}
           </li>
         ))}
       </ul>
-      </div>
+    </div>
   )
 }
