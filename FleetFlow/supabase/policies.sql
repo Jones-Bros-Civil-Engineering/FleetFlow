@@ -207,6 +207,20 @@ using (
   )
 );
 
+create or replace view vw_weekly_group_utilization
+with (security_barrier=true) as
+select
+  gs.week_start::date as week_start,
+  a.contract_id::text as contract_id,
+  a.group_id::text as group_id,
+  count(*) as on_hire_count
+from allocations a
+join generate_series(
+  date_trunc('week', a.start_date),
+  date_trunc('week', a.end_date),
+  interval '1 week'
+) as gs(week_start) on true
+group by gs.week_start, a.contract_id, a.group_id;
 -- vw_weekly_group_utilization: coordinators may read
 grant select on vw_weekly_group_utilization to authenticated;
 alter view vw_weekly_group_utilization enable row level security;
@@ -218,5 +232,10 @@ using (
     'plant_coordinator',
     'workforce_coordinator',
     'admin'
+  )
+  and exists (
+    select 1 from contract_memberships cm
+    where cm.contract_id = vw_weekly_group_utilization.contract_id
+    and cm.profile_id = auth.uid()
   )
 );

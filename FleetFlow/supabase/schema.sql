@@ -146,7 +146,8 @@ from hire_requests r
 join equipment_groups eg on eg.id = r.group_id
 left join contracts c on c.id = r.contract_id;
 
-create or replace view vw_allocations as
+create or replace view vw_allocations
+with (security_barrier=true) as
 select
   a.id::text as id,
   a.contract_id::text as contract_id,
@@ -162,7 +163,8 @@ from allocations a
 join assets asset on asset.id = a.asset_id
 left join contracts c on c.id = a.contract_id;
 
-create or replace view vw_operator_assignments as
+create or replace view vw_operator_assignments
+with (security_barrier=true) as
 select
   oa.id::text as id,
   oa.contract_id::text as contract_id,
@@ -172,10 +174,12 @@ select
   oa.end_date
 from operator_assignments oa;
 
-create or replace view vw_weekly_group_utilization as
+create or replace view vw_weekly_group_utilization
+with (security_barrier=true) as
 select
   gs.week_start::date as week_start,
-  a.group_id,
+  a.contract_id::text as contract_id,
+  a.group_id::text as group_id,
   count(*) as on_hire_count
 from allocations a
 join generate_series(
@@ -183,5 +187,5 @@ join generate_series(
   date_trunc('week', a.end_date),
   interval '1 week'
 ) as gs(week_start) on true
-group by gs.week_start, a.group_id;
+group by gs.week_start, a.contract_id, a.group_id;
 
