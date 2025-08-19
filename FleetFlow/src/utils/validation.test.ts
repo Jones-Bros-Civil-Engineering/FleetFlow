@@ -16,21 +16,23 @@ describe('validateExternalHire', () => {
     ;(supabase.from as Mock).mockReset()
   })
 
-  it('throws when substitution exists', async () => {
+  it('returns available substitutions', async () => {
     const eq = vi.fn().mockResolvedValue({
       data: [{ group_id: '1', substitute_group_id: '2' }],
       error: null,
     })
     const select = vi.fn(() => ({ eq }))
     ;(supabase.from as Mock).mockReturnValue({ select })
-    await expect(validateExternalHire('1')).rejects.toThrow('SUBSTITUTION_AVAILABLE')
+    await expect(validateExternalHire('1')).resolves.toEqual([
+      { group_id: '1', substitute_group_id: '2' },
+    ])
   })
 
-  it('passes when no substitution', async () => {
+  it('returns empty array when no substitution', async () => {
     const eq = vi.fn().mockResolvedValue({ data: [], error: null })
     const select = vi.fn(() => ({ eq }))
     ;(supabase.from as Mock).mockReturnValue({ select })
-    await expect(validateExternalHire('1')).resolves.toBeUndefined()
+    await expect(validateExternalHire('1')).resolves.toEqual([])
   })
 })
 
