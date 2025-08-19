@@ -102,5 +102,10 @@ describe('reassignAllocation', () => {
     })
     expect(result).toEqual({ id: 'e1', title: 'Ev', date: new Date('2024-01-01') })
   })
+
+  it('throws on overlap error', async () => {
+    rpcMock.mockResolvedValue({ data: null, error: { message: 'ALLOCATION_OVERLAP' } })
+    await expect(reassignAllocation('alloc1')).rejects.toThrow('ALLOCATION_OVERLAP')
+  })
 })
 
