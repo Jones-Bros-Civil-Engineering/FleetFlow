@@ -55,3 +55,18 @@ export const AssetScoreSchema = z.object({
   score: z.number(),
 })
 export type AssetScore = z.infer<typeof AssetScoreSchema>
+
+export const OperatorMatchSchema = z.object({
+  operator_id: z.string(),
+  operator_name: z.string(),
+})
+export type OperatorMatch = z.infer<typeof OperatorMatchSchema>
+
+export const OperatorAssignmentSchema = z.object({
+  id: z.string(),
+  request_id: z.string(),
+  operator_id: z.string(),
+  start_date: z.coerce.date(),
+  end_date: z.coerce.date(),
+})
+export type OperatorAssignment = z.infer<typeof OperatorAssignmentSchema>
