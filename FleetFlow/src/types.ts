@@ -50,6 +50,12 @@ export const WeeklyGroupUtilizationSchema = z.object({
 })
 export type WeeklyGroupUtilization = z.infer<typeof WeeklyGroupUtilizationSchema>
 
+export const AssetScoreSchema = z.object({
+  asset_code: z.string(),
+  score: z.number(),
+})
+export type AssetScore = z.infer<typeof AssetScoreSchema>
+
 export const OperatorRankSchema = z.object({
   operator_id: z.string(),
   operator_name: z.string(),
