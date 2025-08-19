@@ -13,6 +13,11 @@ describe('Constraints', () => {
   it('prevents overlapping operator assignments', () => {
     expect(sql).toContain('constraint operator_assignments_no_overlap')
     expect(sql).toContain('operator_id with =')
-    expect(sql).toContain("constraint operator_assignments_date_order")
+  })
+
+  it('enforces start_date before end_date', () => {
+    expect(sql).toContain('constraint allocations_date_order')
+    expect(sql).toContain('constraint hire_requests_date_order')
+    expect(sql).toContain('constraint operator_assignments_date_order')
   })
 })
