@@ -49,3 +49,11 @@ export const WeeklyGroupUtilizationSchema = z.object({
   on_hire_count: z.number(),
 })
 export type WeeklyGroupUtilization = z.infer<typeof WeeklyGroupUtilizationSchema>
+
+export const OperatorRankSchema = z.object({
+  operator_id: z.string(),
+  operator_name: z.string(),
+  eligible: z.boolean(),
+  distance_km: z.number().nullable(),
+})
+export type OperatorRank = z.infer<typeof OperatorRankSchema>

@@ -122,6 +122,7 @@ Open [http://localhost:5173](http://localhost:5173) (or the port Vite shows). Th
 **Workforce Coordinators**
 
 * For operated requests, assign `operators` who have required tickets and no overlaps
+* View ranked operators (eligibility + proximity) via `rpc_rank_operators`
 
 ## APIs (DB views & RPCs)
 
@@ -135,6 +136,7 @@ Open [http://localhost:5173](http://localhost:5173) (or the port Vite shows). Th
 * `rpc_available_assets(group_id, start_date, end_date)`
 * `rpc_score_assets(group_id, start_date, end_date, site_lat, site_lon)` → returns ranked candidates
 * `rpc_allocate_best_asset(request_id, group_id, start_date, end_date, site_lat, site_lon)` → inserts allocation or raises `NO_INTERNAL_ASSET_AVAILABLE`
+* `rpc_rank_operators(request_id)` → ranks operators by ticket eligibility and distance
 
 ## Deployment
 
@@ -144,7 +146,6 @@ Open [http://localhost:5173](http://localhost:5173) (or the port Vite shows). Th
 ## Roadmap
 
 1. Plant Coordinator panel (open requests, score, allocate, external fallback)
-2. Workforce matching RPC + UI (eligibility, distance ranking)
-3. Bar click details drawer (off‑hire, reassign)
-4. Filters (site, status, operated)
-5. Permissions tightening
+2. Bar click details drawer (off‑hire, reassign)
+3. Filters (site, status, operated)
+4. Permissions tightening

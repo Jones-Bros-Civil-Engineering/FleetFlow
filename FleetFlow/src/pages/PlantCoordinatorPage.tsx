@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRequestsQuery } from '../api/queries'
+import OperatorMatchList from '../components/OperatorMatchList'
 import { supabase } from '../lib/supabase'
 
 export default function PlantCoordinatorPage() {
   const { data: requests, isLoading, error } = useRequestsQuery()
   const queryClient = useQueryClient()
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [openRequestId, setOpenRequestId] = useState<string | null>(null)
 
   const allocationMutation = useMutation({
     mutationFn: async (requestId: string) => {
@@ -26,6 +28,10 @@ export default function PlantCoordinatorPage() {
   const handleAllocate = (id: string) => {
     setActiveId(id)
     allocationMutation.mutate(id)
+  }
+
+  const handleToggleOperators = (id: string) => {
+    setOpenRequestId(openRequestId === id ? null : id)
   }
 
   if (isLoading) {
@@ -51,11 +57,17 @@ export default function PlantCoordinatorPage() {
             >
               {allocationMutation.isPending && activeId === r.id ? 'Allocating...' : 'Allocate Asset'}
             </button>
+            <button onClick={() => handleToggleOperators(r.id)}>
+              {openRequestId === r.id ? 'Hide Operators' : 'Rank Operators'}
+            </button>
             {allocationMutation.isError && activeId === r.id && (
               <div>Error allocating asset</div>
             )}
             {allocationMutation.isSuccess && activeId === r.id && (
               <div>Asset allocated successfully!</div>
+            )}
+            {openRequestId === r.id && (
+              <OperatorMatchList requestId={r.id} />
             )}
           </li>
         ))}

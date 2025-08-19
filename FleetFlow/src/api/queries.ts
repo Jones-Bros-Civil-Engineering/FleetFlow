@@ -7,12 +7,14 @@ import {
   AllocationSchema,
   RequestSchema,
   WeeklyGroupUtilizationSchema,
+  OperatorRankSchema,
   type Example,
   type CalendarEvent,
   type EquipmentGroup,
   type Allocation,
   type Request,
   type WeeklyGroupUtilization,
+  type OperatorRank,
 } from '../types'
 
 export const fetchExample = async (): Promise<Example[]> => {
@@ -99,4 +101,23 @@ export const useWeeklyGroupUtilizationQuery = () =>
   useQuery<WeeklyGroupUtilization[], Error>({
     queryKey: ['weekly-group-utilization'],
     queryFn: fetchWeeklyGroupUtilization,
+  })
+
+export const fetchOperatorRankings = async (
+  requestId: string,
+): Promise<OperatorRank[]> => {
+  const { data, error } = await supabase.rpc('rpc_rank_operators', {
+    request_id: requestId,
+  })
+  if (error) {
+    throw new Error(error.message)
+  }
+  return OperatorRankSchema.array().parse(data ?? [])
+}
+
+export const useOperatorRankingsQuery = (requestId: string) =>
+  useQuery<OperatorRank[], Error>({
+    queryKey: ['operator-rankings', requestId],
+    queryFn: () => fetchOperatorRankings(requestId),
+    enabled: Boolean(requestId),
   })
