@@ -19,6 +19,9 @@
 
 .week-calendar .event {
   font-size: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .week-calendar .day-label {
@@ -50,4 +53,30 @@
   border: 1px solid #ccc;
   padding: 0.25rem;
   text-align: center;
+}
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.drawer-content {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  background: #fff;
+  padding: 1rem;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.drawer-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
 }
