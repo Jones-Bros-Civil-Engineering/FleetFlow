@@ -3,9 +3,12 @@ import {
   GroupSubstitutionSchema,
   GroupRequiredTicketSchema,
   OperatorTicketSchema,
+  type GroupSubstitution,
 } from '../types'
 
-export async function validateExternalHire(groupId: string): Promise<void> {
+export async function validateExternalHire(
+  groupId: string,
+): Promise<GroupSubstitution[]> {
   const { data, error } = await supabase
     .from('group_substitutions')
     .select('*')
@@ -13,10 +16,7 @@ export async function validateExternalHire(groupId: string): Promise<void> {
   if (error) {
     throw new Error(error.message)
   }
-  const substitutions = GroupSubstitutionSchema.array().parse(data ?? [])
-  if (substitutions.length > 0) {
-    throw new Error('SUBSTITUTION_AVAILABLE')
-  }
+  return GroupSubstitutionSchema.array().parse(data ?? [])
 }
 
 export async function validateOperatorAssignment(

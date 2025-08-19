@@ -34,8 +34,9 @@ vi.mock('../../lib/supabase', () => ({
   },
 }))
 
+const validateExternalHireMock = vi.hoisted(() => vi.fn().mockResolvedValue([]))
 vi.mock('../../utils/validation', () => ({
-  validateExternalHire: vi.fn(),
+  validateExternalHire: validateExternalHireMock,
 }))
 
 import PlantCoordinatorPage from '../PlantCoordinatorPage'
@@ -57,6 +58,7 @@ describe('PlantCoordinatorPage', () => {
   beforeEach(() => {
     scoreAssetsMock.mockClear()
     rpcMock.mockClear()
+    validateExternalHireMock.mockClear()
   })
 
   it('scores assets and displays results', async () => {
@@ -73,6 +75,30 @@ describe('PlantCoordinatorPage', () => {
     expect(supabase.rpc).toHaveBeenCalledWith('rpc_allocate_best_asset', {
       request_id: 'req1',
     })
+  })
+
+  it('offers substitution and retries allocation', async () => {
+    rpcMock
+      .mockResolvedValueOnce({ error: { message: 'NO_INTERNAL_ASSET_AVAILABLE' } })
+      .mockResolvedValueOnce({ error: null })
+    validateExternalHireMock.mockResolvedValueOnce([
+      { group_id: 'g1', substitute_group_id: 'g2' },
+    ])
+    const promptSpy = vi
+      .spyOn(window, 'prompt')
+      .mockReturnValueOnce('g2')
+    renderPage()
+    fireEvent.click(screen.getByText('Allocate Assets'))
+    await screen.findByText('1 asset(s) allocated internally.')
+    expect(promptSpy).toHaveBeenCalled()
+    expect(supabase.rpc).toHaveBeenNthCalledWith(1, 'rpc_allocate_best_asset', {
+      request_id: 'req1',
+    })
+    expect(supabase.rpc).toHaveBeenNthCalledWith(2, 'rpc_allocate_best_asset', {
+      request_id: 'req1',
+      group_id: 'g2',
+    })
+    promptSpy.mockRestore()
   })
 })
 
