@@ -32,3 +32,9 @@ insert into hire_requests (contract_id, group_id, start_date, end_date, quantity
 insert into allocations (asset_id, group_id, contract_id, request_id, start_date, end_date) values
   (1, 1, 1, 1, '2024-04-01', '2024-04-07');
 
+insert into contract_memberships (profile_id, contract_id) values
+  ('00000000-0000-0000-0000-000000000001', 1);
+
+insert into external_hires (contract_id, request_id) values
+  (1, 1);
+
