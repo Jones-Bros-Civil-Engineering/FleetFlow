@@ -37,7 +37,31 @@ export default function PlantCoordinatorPage() {
         })
         if (error) {
           if (error.message === 'NO_INTERNAL_ASSET_AVAILABLE') {
-            await validateExternalHire(request.group_id)
+            const substitutions = await validateExternalHire(request.group_id)
+            if (substitutions.length > 0) {
+              const choice = window.prompt(
+                `Substitution group available: ${substitutions
+                  .map((s) => s.substitute_group_id)
+                  .join(', ')}\nEnter group id to use:`,
+              )
+              if (choice) {
+                const { error: subError } = await supabase.rpc(
+                  'rpc_allocate_best_asset',
+                  {
+                    request_id: request.id,
+                    group_id: choice,
+                  },
+                )
+                if (subError) {
+                  if (subError.message !== 'NO_INTERNAL_ASSET_AVAILABLE') {
+                    throw new Error(subError.message)
+                  }
+                } else {
+                  internalCount++
+                  continue
+                }
+              }
+            }
             const { error: hireError } = await supabase
               .from('external_hires')
               .insert({ request_id: request.id })
