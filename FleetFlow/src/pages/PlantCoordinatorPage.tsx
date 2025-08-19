@@ -8,6 +8,7 @@ import {
 import type { Request, AssetScore } from '../types'
 import { supabase } from '../lib/supabase'
 import { validateExternalHire } from '../utils/validation'
+import { friendlyErrorMessage } from '../utils/errors'
 
 export default function PlantCoordinatorPage() {
   const { data: requests, isLoading, error } = useRequestsQuery()
@@ -54,7 +55,7 @@ export default function PlantCoordinatorPage() {
                 )
                 if (subError) {
                   if (subError.message !== 'NO_INTERNAL_ASSET_AVAILABLE') {
-                    throw new Error(subError.message)
+                    throw new Error(friendlyErrorMessage(subError.message))
                   }
                 } else {
                   internalCount++
@@ -66,12 +67,12 @@ export default function PlantCoordinatorPage() {
               .from('external_hires')
               .insert({ request_id: request.id })
             if (hireError) {
-              throw new Error(hireError.message)
+              throw new Error(friendlyErrorMessage(hireError.message))
             }
             externalCount++
             continue
           }
-          throw new Error(error.message)
+          throw new Error(friendlyErrorMessage(error.message))
         }
         internalCount++
       }

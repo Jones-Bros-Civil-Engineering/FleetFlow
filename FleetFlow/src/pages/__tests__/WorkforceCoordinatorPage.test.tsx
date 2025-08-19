@@ -60,7 +60,7 @@ describe('WorkforceCoordinatorPage', () => {
     rankOperatorsMock.mockClear()
     insertMock.mockClear()
     fromMock.mockClear()
-    validateOperatorAssignmentMock.mockClear()
+    validateOperatorAssignmentMock.mockReset()
   })
 
   it('ranks operators and displays matches', async () => {
@@ -102,6 +102,16 @@ describe('WorkforceCoordinatorPage', () => {
     expect(screen.getByRole('alert').textContent).toMatch(
       /missing required tickets/i,
     )
+  })
+
+  it('shows conflict error when operator already assigned', async () => {
+    insertMock.mockResolvedValueOnce({ error: { message: 'ASSIGNMENT_OVERLAP' } })
+    renderPage()
+    fireEvent.click(screen.getByText('Rank Operators'))
+    await screen.findByText(/Op One/)
+    fireEvent.click(screen.getByText('Assign'))
+    await screen.findByRole('alert')
+    expect(screen.getByRole('alert').textContent).toMatch(/already assigned/i)
   })
 })
 

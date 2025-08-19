@@ -74,6 +74,9 @@ export default function WeekCalendar({
                     onClick={() => setSelectedEvent(ev)}
                   >
                     {ev.title}
+                    {ev.asset_code && ` - ${ev.asset_code}`}
+                    {ev.operator_name && ` - ${ev.operator_name}`}
+                    {ev.contract_status && ` (${ev.contract_status})`}
                   </button>
                 ))}
               </div>

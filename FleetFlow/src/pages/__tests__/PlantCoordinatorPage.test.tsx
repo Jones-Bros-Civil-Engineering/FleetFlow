@@ -100,5 +100,12 @@ describe('PlantCoordinatorPage', () => {
     })
     promptSpy.mockRestore()
   })
+
+  it('shows friendly error on overlap', async () => {
+    rpcMock.mockResolvedValueOnce({ error: { message: 'ALLOCATION_OVERLAP' } })
+    renderPage()
+    fireEvent.click(screen.getByText('Allocate Assets'))
+    await screen.findByText(/overlaps with existing allocation/)
+  })
 })
 

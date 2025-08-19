@@ -42,4 +42,21 @@ describe('EventDetailsDrawer callbacks', () => {
     fireEvent.click(screen.getAllByText('Reassign').at(-1)!)
     expect(reassign).toHaveBeenCalledWith(event)
   })
+
+  it('shows extra context when provided', () => {
+    const event: CalendarEvent = {
+      id: '2',
+      title: 'Context Event',
+      date: new Date('2024-01-02'),
+      asset_code: 'A1',
+      operator_name: 'Op One',
+      contract_status: 'Active',
+    }
+    render(
+      <EventDetailsDrawer event={event} open={true} onClose={() => {}} />,
+    )
+    expect(screen.getByText(/Asset: A1/)).toBeTruthy()
+    expect(screen.getByText(/Operator: Op One/)).toBeTruthy()
+    expect(screen.getByText(/Status: Active/)).toBeTruthy()
+  })
 })

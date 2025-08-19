@@ -9,6 +9,7 @@ import type { Request, OperatorMatch } from '../types'
 import { supabase } from '../lib/supabase'
 import OperatorMatchList from '../components/OperatorMatchList'
 import { validateOperatorAssignment } from '../utils/validation'
+import { friendlyErrorMessage } from '../utils/errors'
 
 export default function WorkforceCoordinatorPage() {
   const { data: requests, isLoading, error } = useRequestsQuery()
@@ -49,11 +50,8 @@ export default function WorkforceCoordinatorPage() {
       try {
         await validateOperatorAssignment(groupId, operatorId)
       } catch (err) {
-        if (
-          err instanceof Error &&
-          err.message === 'MISSING_REQUIRED_TICKETS'
-        ) {
-          throw new Error('Operator is missing required tickets')
+        if (err instanceof Error) {
+          throw new Error(friendlyErrorMessage(err.message))
         }
         throw err
       }
@@ -64,7 +62,7 @@ export default function WorkforceCoordinatorPage() {
         end_date: endDate.toISOString(),
       })
       if (error) {
-        throw new Error(error.message)
+        throw new Error(friendlyErrorMessage(error.message))
       }
     },
     onSuccess: () => {

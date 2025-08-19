@@ -23,12 +23,18 @@ describe('WeekCalendar', () => {
 
   it('opens event details when event clicked', async () => {
     const events: CalendarEvent[] = [
-      { id: '1', title: 'Test', date: new Date('2024-02-14') },
+      {
+        id: '1',
+        title: 'Test',
+        date: new Date('2024-02-14'),
+        asset_code: 'A1',
+        contract_status: 'Active',
+      },
     ]
     render(
       <WeekCalendar selectedDate={new Date('2024-02-14')} events={events} />,
     )
-    fireEvent.click(screen.getByText('Test'))
+    fireEvent.click(screen.getByText(/Test/))
     expect(await screen.findByText('Off-hire')).toBeTruthy()
   })
 })
