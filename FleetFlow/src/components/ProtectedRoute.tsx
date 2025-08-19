@@ -20,7 +20,7 @@ export default function ProtectedRoute({
   }
 
   if (roles && roles.length > 0 && (!role || !roles.includes(role))) {
-    return <Navigate to='/' replace />
+    return <Navigate to='/unauthorized' replace />
   }
 
   return <>{children}</>

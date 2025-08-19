@@ -25,4 +25,25 @@ describe('RLS policies', () => {
       "auth.jwt() ->> 'role' in ('workforce_coordinator', 'admin')",
     )
   })
+
+  it('restricts hire_requests to coordinators', () => {
+    expect(sql).toContain("alter table hire_requests enable row level security")
+    expect(sql).toMatch(
+      /auth\.jwt\(\) ->> 'role' in \(\s*'plant_coordinator',\s*'workforce_coordinator',\s*'admin'\s*\)/,
+    )
+  })
+
+  it('restricts calendar_events to coordinators', () => {
+    expect(sql).toContain("alter table calendar_events enable row level security")
+    expect(sql).toMatch(
+      /auth\.jwt\(\) ->> 'role' in \(\s*'plant_coordinator',\s*'workforce_coordinator',\s*'admin'\s*\)/,
+    )
+  })
+
+  it('restricts equipment_groups to coordinators', () => {
+    expect(sql).toContain("alter table equipment_groups enable row level security")
+    expect(sql).toMatch(
+      /auth\.jwt\(\) ->> 'role' in \(\s*'plant_coordinator',\s*'workforce_coordinator',\s*'admin'\s*\)/,
+    )
+  })
 })

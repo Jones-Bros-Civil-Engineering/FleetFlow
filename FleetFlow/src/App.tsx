@@ -5,6 +5,7 @@ import WorkforceCoordinatorPage from './pages/WorkforceCoordinatorPage'
 import LoginPage from './pages/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './components/AuthProvider'
+import UnauthorizedPage from './pages/UnauthorizedPage'
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path='/login' element={<LoginPage />} />
+          <Route path='/unauthorized' element={<UnauthorizedPage />} />
           <Route
             path='/'
             element={
