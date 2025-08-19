@@ -52,7 +52,9 @@ export const useEventsQuery = () =>
   })
 
 export const fetchEquipmentGroups = async (): Promise<EquipmentGroup[]> => {
-  const { data, error } = await supabase.from('equipment_groups').select('*')
+  const { data, error } = await supabase
+    .from('vw_equipment_groups')
+    .select('*')
   if (error) {
     throw new Error(error.message)
   }
@@ -80,7 +82,9 @@ export const useAllocationsQuery = () =>
   })
 
 export const fetchRequests = async (): Promise<Request[]> => {
-  const { data, error } = await supabase.from('hire_requests').select('*')
+  const { data, error } = await supabase
+    .from('vw_hire_requests')
+    .select('*')
   if (error) {
     throw new Error(error.message)
   }
