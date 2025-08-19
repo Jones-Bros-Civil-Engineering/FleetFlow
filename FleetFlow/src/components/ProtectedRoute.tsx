@@ -7,7 +7,7 @@ export default function ProtectedRoute({
   roles,
 }: {
   children: ReactNode
-  roles?: string[]
+  roles: string[]
 }) {
   const { user } = useAuth()
 
@@ -16,7 +16,7 @@ export default function ProtectedRoute({
   }
 
   const userRole = (user.user_metadata as { role?: string } | undefined)?.role
-  if (roles && (!userRole || !roles.includes(userRole))) {
+  if (!userRole || !roles.includes(userRole)) {
     return <Navigate to='/' replace />
   }
 
