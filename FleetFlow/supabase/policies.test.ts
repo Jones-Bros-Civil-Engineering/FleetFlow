@@ -10,39 +10,45 @@ const run = (cmd: string, args: string[], opts = {}) => {
   return result;
 };
 
-beforeAll(() => {
-  // ensure postgres is running
-  spawnSync('pg_ctlcluster', ['16', 'main', 'start']);
+const hasPostgresUser = spawnSync('id', ['postgres']).status === 0;
 
-  // recreate test database
-  run('sudo', ['-u', 'postgres', 'psql', '-c', 'DROP DATABASE IF EXISTS fleetflow_test;']);
-  run('sudo', ['-u', 'postgres', 'psql', '-c', 'CREATE DATABASE fleetflow_test;']);
+(hasPostgresUser ? describe : describe.skip)('RLS policies', () => {
+  beforeAll(() => {
+    // ensure postgres is running
+    spawnSync('pg_ctlcluster', ['16', 'main', 'start']);
 
-  // minimal table structure
-  run('sudo', ['-u', 'postgres', 'psql', '-d', 'fleetflow_test', '-c', `
-    CREATE TABLE external_hires(id serial primary key);
-    CREATE TABLE allocations(id serial primary key);
-    CREATE TABLE operator_assignments(id serial primary key);
-    INSERT INTO external_hires DEFAULT VALUES;
-  `]);
+    // recreate test database
+    run('sudo', ['-u', 'postgres', 'psql', '-c', 'DROP DATABASE IF EXISTS fleetflow_test;']);
+    run('sudo', ['-u', 'postgres', 'psql', '-c', 'CREATE DATABASE fleetflow_test;']);
 
-  // apply policies
-  run('sudo', ['-u', 'postgres', 'psql', '-d', 'fleetflow_test', '-f', resolve(__dirname, 'policies.sql')]);
+    // minimal table structure
+    run('sudo', ['-u', 'postgres', 'psql', '-d', 'fleetflow_test', '-c', `
+      CREATE TABLE external_hires(id serial primary key);
+      CREATE TABLE allocations(id serial primary key);
+      CREATE TABLE operator_assignments(id serial primary key);
+      INSERT INTO external_hires DEFAULT VALUES;
+    `]);
 
-  // create unauthorized role
-  run('sudo', ['-u', 'postgres', 'psql', '-c', `
-    DROP ROLE IF EXISTS authenticated;
-    CREATE ROLE authenticated LOGIN PASSWORD 'secret';
-    GRANT CONNECT ON DATABASE fleetflow_test TO authenticated;
-  `]);
-});
+    // apply policies
+    run('sudo', ['-u', 'postgres', 'psql', '-d', 'fleetflow_test', '-f', resolve(__dirname, 'policies.sql')]);
 
-describe('RLS policies', () => {
+    // create unauthorized role
+    run('sudo', ['-u', 'postgres', 'psql', '-c', `
+      DROP ROLE IF EXISTS authenticated;
+      CREATE ROLE authenticated LOGIN PASSWORD 'secret';
+      GRANT CONNECT ON DATABASE fleetflow_test TO authenticated;
+    `]);
+  });
+
   it('prevents direct table reads for unauthorised roles', () => {
-    const result = spawnSync('psql', ['-h', 'localhost', '-U', 'authenticated', '-d', 'fleetflow_test', '-c', 'select * from external_hires;'], {
-      env: { ...process.env, PGPASSWORD: 'secret' },
-      encoding: 'utf8'
-    });
+    const result = spawnSync(
+      'psql',
+      ['-h', 'localhost', '-U', 'authenticated', '-d', 'fleetflow_test', '-c', 'select * from external_hires;'],
+      {
+        env: { ...process.env, PGPASSWORD: 'secret' },
+        encoding: 'utf8',
+      },
+    );
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('permission denied');
   });
