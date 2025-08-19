@@ -14,8 +14,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data } = await supabase.auth.getUser()
       setUser(data.user)
       if (data.user) {
-        const { data: roleData } = await supabase.rpc('get_role')
-        setRole(roleData)
+        const { data: roleRes } = await supabase.rpc('rpc_get_role')
+        setRole(roleRes ?? null)
       } else {
         setRole(null)
       }
