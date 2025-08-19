@@ -18,6 +18,10 @@ begin
     raise exception 'REQUEST_NOT_FOUND';
   end if;
 
+  if req.start_date > req.end_date then
+    raise exception 'INVALID_DATE_RANGE';
+  end if;
+
   for cand in
     select a.id, a.code, s.score
       from rpc_score_assets(request_id) s
@@ -35,5 +39,8 @@ begin
   end loop;
 
   raise exception 'NO_INTERNAL_ASSET_AVAILABLE';
+exception
+  when insufficient_privilege then
+    raise exception 'UNAUTHORIZED';
 end;
 $$;
