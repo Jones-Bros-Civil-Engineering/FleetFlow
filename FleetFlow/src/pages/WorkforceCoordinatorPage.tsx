@@ -20,7 +20,12 @@ export default function WorkforceCoordinatorPage() {
 
   const rankMutation = useMutation({
     mutationFn: (request: Request) =>
-      rankOperators(request.start_date, request.end_date),
+      rankOperators(
+        request.start_date,
+        request.end_date,
+        request.site_lat,
+        request.site_lon,
+      ),
     onSuccess: (data, variables) => {
       setMatches((prev) => ({ ...prev, [variables.id]: data }))
     },
@@ -113,7 +118,7 @@ export default function WorkforceCoordinatorPage() {
                 operators={matches[r.id].map((m) => ({
                   id: m.operator_id,
                   name: m.operator_name,
-                  distance_km: null,
+                  distance_km: m.distance_km,
                 }))}
                 onAssign={(opId) => handleAssign(r, String(opId))}
               />

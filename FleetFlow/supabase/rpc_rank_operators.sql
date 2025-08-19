@@ -4,21 +4,33 @@
 --               requested dates.
 -- Parameters:
 --   req_start date - start date of the request
---   req_end   date - end date of the request
--- Returns: table(operator_id uuid, operator_name text)
+--   site_lat double precision - latitude of the request site
+--   site_lon double precision - longitude of the request site
+-- Returns: table(operator_id uuid, operator_name text, distance_km double precision)
 create or replace function rpc_rank_operators(
   req_start date,
-  req_end date
+  req_end date,
+  site_lat double precision,
+  site_lon double precision
 )
 returns table (
   operator_id uuid,
-  operator_name text
+  operator_name text,
+  distance_km double precision
 )
 language sql
 stable
 as $$
   select o.id as operator_id,
-         o.name as operator_name
+         o.name as operator_name,
+         case
+           when o.home_lat is not null and o.home_lon is not null then
+             (st_distanceSphere(
+                st_makepoint(site_lon, site_lat),
+                st_makepoint(o.home_lon, o.home_lat)
+              ) / 1000)
+           else null
+         end as distance_km
   from operators o
   left join operator_assignments oa
     on oa.operator_id = o.id
@@ -30,5 +42,5 @@ as $$
    and ou.end_date >= req_start
   where oa.operator_id is null
     and ou.operator_id is null
-  order by o.name;
+  order by distance_km nulls last, o.name;
 $$;

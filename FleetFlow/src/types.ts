@@ -43,6 +43,8 @@ export const RequestSchema = z.object({
   end_date: z.coerce.date(),
   quantity: z.number(),
   operated: z.boolean(),
+  site_lat: z.number(),
+  site_lon: z.number(),
 })
 export type Request = z.infer<typeof RequestSchema>
 
@@ -62,6 +64,7 @@ export type AssetScore = z.infer<typeof AssetScoreSchema>
 export const OperatorMatchSchema = z.object({
   operator_id: z.string(),
   operator_name: z.string(),
+  distance_km: z.number().nullable(),
 })
 export type OperatorMatch = z.infer<typeof OperatorMatchSchema>
 

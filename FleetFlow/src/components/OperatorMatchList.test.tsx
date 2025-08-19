@@ -20,4 +20,16 @@ describe('OperatorMatchList', () => {
     )
     expect(html).toContain('Assign')
   })
+
+  it('sorts by distance ascending', () => {
+    const html = renderToString(
+      <OperatorMatchList
+        operators={[
+          { id: 1, name: 'Far', distance_km: 10 },
+          { id: 2, name: 'Near', distance_km: 5 },
+        ]}
+      />,
+    )
+    expect(html.indexOf('Near')).toBeLessThan(html.indexOf('Far'))
+  })
 })
