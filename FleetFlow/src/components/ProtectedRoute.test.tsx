@@ -75,5 +75,49 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByText('Unauthorized')).toBeTruthy()
   })
+
+  it('renders loading state when auth is loading', () => {
+    render(
+      <AuthContext.Provider value={{ user: null, role: null, loading: true }}>
+        <MemoryRouter initialEntries={['/protected']}>
+          <Routes>
+            <Route
+              path='/protected'
+              element={
+                <ProtectedRoute roles={['plant_coordinator']}>
+                  <div>Secret</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    )
+
+    expect(screen.getByText('Loading...')).toBeTruthy()
+  })
+
+  it('renders children when no roles specified', () => {
+    render(
+      <AuthContext.Provider
+        value={{ user: {} as User, role: 'driver', loading: false }}
+      >
+        <MemoryRouter initialEntries={['/protected']}>
+          <Routes>
+            <Route
+              path='/protected'
+              element={
+                <ProtectedRoute>
+                  <div>Open</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    )
+
+    expect(screen.getByText('Open')).toBeTruthy()
+  })
 })
 

@@ -34,6 +34,13 @@ describe('validateExternalHire', () => {
     ;(supabase.from as Mock).mockReturnValue({ select })
     await expect(validateExternalHire('1')).resolves.toEqual([])
   })
+
+  it('throws when query fails', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: null, error: { message: 'boom' } })
+    const select = vi.fn(() => ({ eq }))
+    ;(supabase.from as Mock).mockReturnValue({ select })
+    await expect(validateExternalHire('1')).rejects.toThrow('boom')
+  })
 })
 
 describe('validateOperatorAssignment', () => {
@@ -93,5 +100,39 @@ describe('validateOperatorAssignment', () => {
     })
 
     await expect(validateOperatorAssignment('1', 'op')).resolves.toBeUndefined()
+  })
+
+  it('returns immediately when no required tickets', async () => {
+    const from = supabase.from as Mock
+    const operatorSpy = vi.fn()
+    from.mockImplementation((table: string) => {
+      if (table === 'group_required_tickets') {
+        const eq = vi.fn().mockResolvedValue({ data: [], error: null })
+        return { select: () => ({ eq }) }
+      }
+      if (table === 'operator_tickets') {
+        return { select: () => ({ eq: operatorSpy }) }
+      }
+      return { select: () => ({ eq: vi.fn() }) }
+    })
+
+    await expect(validateOperatorAssignment('1', 'op')).resolves.toBeUndefined()
+    expect(operatorSpy).not.toHaveBeenCalled()
+  })
+
+  it('throws when required tickets query fails', async () => {
+    const from = supabase.from as Mock
+    from.mockImplementation((table: string) => {
+      if (table === 'group_required_tickets') {
+        const eq = vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'bad' },
+        })
+        return { select: () => ({ eq }) }
+      }
+      return { select: () => ({ eq: vi.fn() }) }
+    })
+
+    await expect(validateOperatorAssignment('1', 'op')).rejects.toThrow('bad')
   })
 })

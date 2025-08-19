@@ -5,8 +5,9 @@ vi.mock('@tanstack/react-query', () => ({
 }))
 
 const rpcMock = vi.hoisted(() => vi.fn())
+const fromMock = vi.hoisted(() => vi.fn())
 vi.mock('../lib/supabase', () => ({
-  supabase: { rpc: rpcMock },
+  supabase: { rpc: rpcMock, from: fromMock },
 }))
 
 import { useQuery } from '@tanstack/react-query'
@@ -18,6 +19,12 @@ import {
   rankOperators,
   offHireAllocation,
   reassignAllocation,
+  fetchEvents,
+  useEventsQuery,
+  fetchEquipmentGroups,
+  useEquipmentGroupsQuery,
+  fetchOperatorAssignments,
+  useOperatorAssignmentsQuery,
 } from './queries'
 
 describe('useExampleQuery', () => {
@@ -32,6 +39,128 @@ describe('useExampleQuery', () => {
       queryFn: fetchExample,
     })
     expect(result).toBe(fakeResult)
+  })
+})
+
+describe('useEventsQuery', () => {
+  beforeEach(() => (useQuery as Mock).mockReset())
+
+  it('calls useQuery with events key and fetcher', () => {
+    const fakeResult = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fakeResult)
+
+    const result = useEventsQuery()
+
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['events'],
+      queryFn: fetchEvents,
+    })
+    expect(result).toBe(fakeResult)
+  })
+})
+
+describe('fetchEvents', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('returns parsed events', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: [{ id: '1', date: '2024-01-01', title: 'Ev' }],
+      error: null,
+    })
+    fromMock.mockReturnValue({ select })
+    const result = await fetchEvents()
+    expect(fromMock).toHaveBeenCalledWith('calendar_events')
+    expect(result).toEqual([
+      { id: '1', date: new Date('2024-01-01'), title: 'Ev' },
+    ])
+  })
+
+  it('throws on fetch error', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'fail' },
+    })
+    fromMock.mockReturnValue({ select })
+    await expect(fetchEvents()).rejects.toThrow('fail')
+  })
+})
+
+describe('useEquipmentGroupsQuery', () => {
+  beforeEach(() => (useQuery as Mock).mockReset())
+
+  it('calls useQuery with equipment-groups key and fetcher', () => {
+    const fakeResult = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fakeResult)
+
+    const result = useEquipmentGroupsQuery()
+
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['equipment-groups'],
+      queryFn: fetchEquipmentGroups,
+    })
+    expect(result).toBe(fakeResult)
+  })
+})
+
+describe('fetchEquipmentGroups', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('throws on fetch error', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'oops' },
+    })
+    fromMock.mockReturnValue({ select })
+    await expect(fetchEquipmentGroups()).rejects.toThrow('oops')
+    expect(fromMock).toHaveBeenCalledWith('equipment_groups')
+  })
+})
+
+describe('useOperatorAssignmentsQuery', () => {
+  beforeEach(() => (useQuery as Mock).mockReset())
+
+  it('calls useQuery with operator assignments key and fetcher', () => {
+    const fakeResult = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fakeResult)
+
+    const result = useOperatorAssignmentsQuery()
+
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['operator-assignments'],
+      queryFn: fetchOperatorAssignments,
+    })
+    expect(result).toBe(fakeResult)
+  })
+})
+
+describe('fetchOperatorAssignments', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('returns parsed assignments', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: [
+        {
+          id: '1',
+          request_id: 'r1',
+          operator_id: 'o1',
+          start_date: '2024-01-01',
+          end_date: '2024-01-02',
+        },
+      ],
+      error: null,
+    })
+    fromMock.mockReturnValue({ select })
+    const result = await fetchOperatorAssignments()
+    expect(fromMock).toHaveBeenCalledWith('operator_assignments')
+    expect(result).toEqual([
+      {
+        id: '1',
+        request_id: 'r1',
+        operator_id: 'o1',
+        start_date: new Date('2024-01-01'),
+        end_date: new Date('2024-01-02'),
+      },
+    ])
   })
 })
 
