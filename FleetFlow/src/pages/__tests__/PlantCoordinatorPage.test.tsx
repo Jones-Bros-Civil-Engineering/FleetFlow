@@ -26,16 +26,19 @@ vi.mock('../../api/queries', () => ({
   scoreAssets: scoreAssetsMock,
 }))
 
+const insertMock = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
+const fromMock = vi.hoisted(() => vi.fn(() => ({ insert: insertMock })))
 const rpcMock = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
 vi.mock('../../lib/supabase', () => ({
   supabase: {
     rpc: rpcMock,
-    from: vi.fn(() => ({ insert: vi.fn().mockResolvedValue({ error: null }) })),
+    from: fromMock,
   },
 }))
 
+const validateExternalHireMock = vi.hoisted(() => vi.fn())
 vi.mock('../../utils/validation', () => ({
-  validateExternalHire: vi.fn(),
+  validateExternalHire: validateExternalHireMock,
 }))
 
 import PlantCoordinatorPage from '../PlantCoordinatorPage'
@@ -57,6 +60,9 @@ describe('PlantCoordinatorPage', () => {
   beforeEach(() => {
     scoreAssetsMock.mockClear()
     rpcMock.mockClear()
+    fromMock.mockClear()
+    insertMock.mockClear()
+    validateExternalHireMock.mockClear()
   })
 
   it('scores assets and displays results', async () => {
@@ -73,6 +79,16 @@ describe('PlantCoordinatorPage', () => {
     expect(supabase.rpc).toHaveBeenCalledWith('rpc_allocate_best_asset', {
       request_id: 'req1',
     })
+  })
+
+  it('falls back to external hire when no internal asset available', async () => {
+    rpcMock.mockResolvedValueOnce({ error: { message: 'NO_INTERNAL_ASSET_AVAILABLE' } })
+    renderPage()
+    fireEvent.click(screen.getByText('Allocate Assets'))
+    await screen.findByText('1 external hire(s) created.')
+    expect(validateExternalHireMock).toHaveBeenCalledWith('g1')
+    expect(fromMock).toHaveBeenCalledWith('external_hires')
+    expect(insertMock).toHaveBeenCalledWith({ request_id: 'req1' })
   })
 })
 
