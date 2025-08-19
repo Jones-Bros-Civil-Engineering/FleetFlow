@@ -28,13 +28,13 @@ test('allocates asset via PlantCoordinatorPage', async ({ mount }) => {
 test('assigns operator via WorkforceCoordinatorPage', async ({ mount }) => {
   const component = await mount(withProviders(<WorkforceCoordinatorPage />))
   const { count: before } = await supabase
-    .from('operator_assignments')
+    .from('vw_operator_assignments')
     .select('*', { count: 'exact', head: true })
   await component.getByRole('button', { name: 'Rank Operators' }).click()
   await component.getByRole('button', { name: /Assign/ }).click()
   await component.getByText('Operator assigned!')
   const { count: after } = await supabase
-    .from('operator_assignments')
+    .from('vw_operator_assignments')
     .select('*', { count: 'exact', head: true })
   expect((after ?? 0) > (before ?? 0)).toBeTruthy()
 })

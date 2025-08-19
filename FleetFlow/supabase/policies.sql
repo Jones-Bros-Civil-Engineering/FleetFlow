@@ -145,7 +145,20 @@ using (
 
 create or replace view vw_allocations
 with (security_barrier=true) as
-select * from allocations;
+select
+  a.id::text as id,
+  a.contract_id::text as contract_id,
+  asset.code as asset_code,
+  a.group_id::text as group_id,
+  a.start_date,
+  a.end_date,
+  'internal'::text as source,
+  c.status as contract_status,
+  c.code as contract_code,
+  a.request_id::text as request_id
+from allocations a
+join assets asset on asset.id = a.asset_id
+left join contracts c on c.id = a.contract_id;
 grant select on vw_allocations to authenticated;
 alter view vw_allocations enable row level security;
 create policy vw_allocations_select on vw_allocations
@@ -162,7 +175,14 @@ using (
 
 create or replace view vw_operator_assignments
 with (security_barrier=true) as
-select * from operator_assignments;
+select
+  oa.id::text as id,
+  oa.contract_id::text as contract_id,
+  oa.request_id::text as request_id,
+  oa.operator_id::text as operator_id,
+  oa.start_date,
+  oa.end_date
+from operator_assignments oa;
 grant select on vw_operator_assignments to authenticated;
 alter view vw_operator_assignments enable row level security;
 create policy vw_operator_assignments_select on vw_operator_assignments

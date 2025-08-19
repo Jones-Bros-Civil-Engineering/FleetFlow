@@ -24,9 +24,26 @@ const hasPostgresUser = spawnSync('id', ['postgres']).status === 0;
     // minimal table structure
     run('sudo', ['-u', 'postgres', 'psql', '-d', 'fleetflow_test', '-c', `
       CREATE TABLE contract_memberships(profile_id uuid, contract_id int);
+      CREATE TABLE contracts(id serial primary key, code text, status text);
+      CREATE TABLE assets(id serial primary key, code text);
       CREATE TABLE external_hires(id serial primary key, contract_id int);
-      CREATE TABLE allocations(id serial primary key, contract_id int);
-      CREATE TABLE operator_assignments(id serial primary key, contract_id int);
+      CREATE TABLE allocations(
+        id serial primary key,
+        contract_id int,
+        asset_id int,
+        group_id int,
+        start_date date,
+        end_date date,
+        request_id int
+      );
+      CREATE TABLE operator_assignments(
+        id serial primary key,
+        contract_id int,
+        request_id int,
+        operator_id int,
+        start_date date,
+        end_date date
+      );
       INSERT INTO external_hires(contract_id) VALUES (1);
     `]);
 

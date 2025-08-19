@@ -117,6 +117,32 @@ from hire_requests r
 join equipment_groups eg on eg.id = r.group_id
 left join contracts c on c.id = r.contract_id;
 
+create or replace view vw_allocations as
+select
+  a.id::text as id,
+  a.contract_id::text as contract_id,
+  asset.code as asset_code,
+  a.group_id::text as group_id,
+  a.start_date,
+  a.end_date,
+  'internal'::text as source,
+  c.status as contract_status,
+  c.code as contract_code,
+  a.request_id::text as request_id
+from allocations a
+join assets asset on asset.id = a.asset_id
+left join contracts c on c.id = a.contract_id;
+
+create or replace view vw_operator_assignments as
+select
+  oa.id::text as id,
+  oa.contract_id::text as contract_id,
+  oa.request_id::text as request_id,
+  oa.operator_id::text as operator_id,
+  oa.start_date,
+  oa.end_date
+from operator_assignments oa;
+
 create or replace view vw_weekly_group_utilization as
 select
   gs.week_start::date as week_start,
