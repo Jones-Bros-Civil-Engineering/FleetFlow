@@ -10,6 +10,9 @@ export const CalendarEventSchema = z.object({
   id: z.string(),
   date: z.coerce.date(),
   title: z.string(),
+  site: z.string().optional(),
+  contract_status: z.string().optional(),
+  operated: z.boolean().optional(),
 })
 export type CalendarEvent = z.infer<typeof CalendarEventSchema>
 
