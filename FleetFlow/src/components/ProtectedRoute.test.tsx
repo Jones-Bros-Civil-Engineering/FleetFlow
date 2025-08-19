@@ -9,7 +9,7 @@ import type { User } from '@supabase/supabase-js'
 describe('ProtectedRoute', () => {
   it('redirects to login when user is not authenticated', () => {
     render(
-      <AuthContext.Provider value={{ user: null }}>
+      <AuthContext.Provider value={{ user: null, role: null }}>
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>
             <Route path='/login' element={<div>Login Page</div>} />
@@ -32,7 +32,7 @@ describe('ProtectedRoute', () => {
   it('renders children when role matches', () => {
     render(
       <AuthContext.Provider
-        value={{ user: { user_metadata: { role: 'plant_coordinator' } } as unknown as User }}
+        value={{ user: {} as User, role: 'plant_coordinator' }}
       >
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>
@@ -55,7 +55,7 @@ describe('ProtectedRoute', () => {
   it('redirects to home when role does not match', () => {
     render(
       <AuthContext.Provider
-        value={{ user: { user_metadata: { role: 'driver' } } as unknown as User }}
+        value={{ user: {} as User, role: 'driver' }}
       >
         <MemoryRouter initialEntries={['/protected']}>
           <Routes>

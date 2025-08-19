@@ -9,14 +9,13 @@ export default function ProtectedRoute({
   children: ReactNode
   roles: string[]
 }) {
-  const { user } = useAuth()
+  const { user, role } = useAuth()
 
   if (!user) {
     return <Navigate to='/login' replace />
   }
 
-  const userRole = (user.user_metadata as { role?: string } | undefined)?.role
-  if (!userRole || !roles.includes(userRole)) {
+  if (!role || !roles.includes(role)) {
     return <Navigate to='/' replace />
   }
 
