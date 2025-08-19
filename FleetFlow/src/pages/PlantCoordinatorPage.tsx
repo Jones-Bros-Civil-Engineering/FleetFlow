@@ -7,6 +7,7 @@ import {
 } from '../api/queries'
 import type { Request, AssetScore } from '../types'
 import { supabase } from '../lib/supabase'
+import { validateExternalHire } from '../utils/validation'
 
 export default function PlantCoordinatorPage() {
   const { data: requests, isLoading, error } = useRequestsQuery()
@@ -36,6 +37,7 @@ export default function PlantCoordinatorPage() {
         })
         if (error) {
           if (error.message === 'NO_INTERNAL_ASSET_AVAILABLE') {
+            await validateExternalHire(request.group_id)
             const { error: hireError } = await supabase
               .from('external_hires')
               .insert({ request_id: request.id })
