@@ -33,11 +33,8 @@ describe('RLS policies', () => {
     )
   })
 
-  it('restricts calendar_events to coordinators', () => {
-    expect(sql).toContain("alter table calendar_events enable row level security")
-    expect(sql).toMatch(
-      /auth\.jwt\(\) ->> 'role' in \(\s*'plant_coordinator',\s*'workforce_coordinator'\s*\)/,
-    )
+  it('grants calendar_events view to authenticated users', () => {
+    expect(sql).toContain('grant select on calendar_events to authenticated')
   })
 
   it('restricts equipment_groups to coordinators', () => {
@@ -45,6 +42,10 @@ describe('RLS policies', () => {
     expect(sql).toMatch(
       /auth\.jwt\(\) ->> 'role' in \(\s*'plant_coordinator',\s*'workforce_coordinator'\s*\)/,
     )
+  })
+
+  it('grants vw_weekly_group_utilization view to authenticated users', () => {
+    expect(sql).toContain('grant select on vw_weekly_group_utilization to authenticated')
   })
 
   it('does not expose admin role in policies', () => {

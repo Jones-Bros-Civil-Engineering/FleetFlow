@@ -93,23 +93,9 @@ using (
   )
 );
 
--- calendar_events: coordinators may read
-alter table calendar_events enable row level security;
-revoke select on calendar_events from public;
-
-create policy calendar_events_select_coordinators on calendar_events
-for select
-to authenticated
-using (
-  auth.jwt() ->> 'role' in (
-    'plant_coordinator',
-    'workforce_coordinator'
-  )
-);
-
--- equipment_groups: coordinators may read
-alter table equipment_groups enable row level security;
-revoke select on equipment_groups from public;
+ -- equipment_groups: coordinators may read
+  alter table equipment_groups enable row level security;
+  revoke select on equipment_groups from public;
 
 create policy equipment_groups_select_coordinators on equipment_groups
 for select
@@ -133,3 +119,6 @@ grant select on vw_allocations to authenticated;
 create or replace view vw_operator_assignments as
 select * from operator_assignments;
 grant select on vw_operator_assignments to authenticated;
+
+grant select on calendar_events to authenticated;
+grant select on vw_weekly_group_utilization to authenticated;
