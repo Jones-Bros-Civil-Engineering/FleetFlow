@@ -7,12 +7,14 @@ import {
   AllocationSchema,
   RequestSchema,
   WeeklyGroupUtilizationSchema,
+  AssetScoreSchema,
   type Example,
   type CalendarEvent,
   type EquipmentGroup,
   type Allocation,
   type Request,
   type WeeklyGroupUtilization,
+  type AssetScore,
 } from '../types'
 
 export const fetchExample = async (): Promise<Example[]> => {
@@ -84,6 +86,16 @@ export const useRequestsQuery = () =>
     queryKey: ['requests'],
     queryFn: fetchRequests,
   })
+
+export const scoreAssets = async (requestId: string): Promise<AssetScore[]> => {
+  const { data, error } = await supabase.rpc('rpc_score_assets', {
+    request_id: requestId,
+  })
+  if (error) {
+    throw new Error(error.message)
+  }
+  return AssetScoreSchema.array().parse(data ?? [])
+}
 
 export const fetchWeeklyGroupUtilization = async (): Promise<WeeklyGroupUtilization[]> => {
   const { data, error } = await supabase

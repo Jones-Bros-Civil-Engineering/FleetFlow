@@ -49,3 +49,9 @@ export const WeeklyGroupUtilizationSchema = z.object({
   on_hire_count: z.number(),
 })
 export type WeeklyGroupUtilization = z.infer<typeof WeeklyGroupUtilizationSchema>
+
+export const AssetScoreSchema = z.object({
+  asset_code: z.string(),
+  score: z.number(),
+})
+export type AssetScore = z.infer<typeof AssetScoreSchema>
