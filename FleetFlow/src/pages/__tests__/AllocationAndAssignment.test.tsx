@@ -141,8 +141,8 @@ describe('Workforce assignment workflow', () => {
     expect(insertMock).toHaveBeenCalledWith({
       request_id: workforceRequest.id,
       operator_id: 'op1',
-      start_date: workforceRequest.start_date.toISOString(),
-      end_date: workforceRequest.end_date.toISOString(),
+      start_date: workforceRequest.start_date.toISOString().slice(0, 10),
+      end_date: workforceRequest.end_date.toISOString().slice(0, 10),
     })
   })
 })
