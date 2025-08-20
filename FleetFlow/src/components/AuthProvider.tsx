@@ -11,12 +11,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true)
-      const { data } = await supabase.auth.getUser()
-      setUser(data.user)
-      if (data.user) {
-        const { data: roleRes } = await supabase.rpc('rpc_get_role')
-        setRole(roleRes ?? null)
-      } else {
+      try {
+        const { data } = await supabase.auth.getUser()
+        setUser(data.user)
+        if (data.user) {
+          try {
+            const { data: roleRes } = await supabase.rpc('rpc_get_role')
+            setRole(roleRes ?? null)
+          } catch (error) {
+            console.warn('Could not fetch user role:', error)
+            setRole('contract_manager') // Default role fallback
+          }
+        } else {
+          setRole(null)
+        }
+      } catch (error) {
+        console.error('Auth error:', error)
+        setUser(null)
         setRole(null)
       }
       setLoading(false)
