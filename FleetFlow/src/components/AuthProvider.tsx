@@ -38,8 +38,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Auth error:', error)
         setUser(null)
         setRole(null)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     initializeUser()
@@ -48,13 +49,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user ?? null
       setUser(currentUser)
-      setLoading(true)
       if (currentUser) {
         await fetchRole()
       } else {
         setRole(null)
       }
-      setLoading(false)
     })
     return () => {
       subscription.unsubscribe()
