@@ -145,5 +145,29 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByText('Open')).toBeTruthy()
   })
+
+  it('redirects to unauthorized when role is null even without restrictions', () => {
+    render(
+      <AuthContext.Provider
+        value={{ user: {} as User, role: null, loading: false }}
+      >
+        <MemoryRouter initialEntries={['/protected']}>
+          <Routes>
+            <Route path='/unauthorized' element={<div>Unauthorized</div>} />
+            <Route
+              path='/protected'
+              element={
+                <ProtectedRoute>
+                  <div>Open</div>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    )
+
+    expect(screen.getByText('Unauthorized')).toBeTruthy()
+  })
 })
 

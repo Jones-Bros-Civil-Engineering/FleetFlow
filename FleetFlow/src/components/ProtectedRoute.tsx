@@ -19,11 +19,15 @@ export default function ProtectedRoute({
     return <Navigate to='/login' replace />
   }
 
+  if (role === null) {
+    return <Navigate to='/unauthorized' replace />
+  }
+
   if (role === 'admin') {
     return <>{children}</>
   }
 
-  if (roles && roles.length > 0 && (!role || !roles.includes(role))) {
+  if (roles && roles.length > 0 && !roles.includes(role)) {
     return <Navigate to='/unauthorized' replace />
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
+import { toast } from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { AuthContext } from './auth-context'
 
@@ -14,8 +15,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: roleRes } = await supabase.rpc('rpc_get_role')
         setRole(roleRes ?? null)
       } catch (error) {
-        console.warn('Could not fetch user role:', error)
-        setRole('contract_manager') // Default role fallback
+        console.error('Could not fetch user role:', error)
+        toast.error('Failed to fetch user role')
+        setRole(null)
       }
     }
 
