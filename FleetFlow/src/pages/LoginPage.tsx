@@ -1,25 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../components/auth-context'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitting(true)
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
     if (signInError) {
       setError(signInError.message)
+      setSubmitting(false)
       return
     }
-    navigate('/')
   }
+
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true })
+    }
+  }, [user, navigate])
 
   return (
     <div>
@@ -41,7 +51,10 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
-        <button type='submit'>Sign In</button>
+        <button type='submit' disabled={submitting}>
+          {submitting ? 'Signing In...' : 'Sign In'}
+        </button>
+        {submitting && <div>Loading...</div>}
         {error && <div>{error}</div>}
       </form>
     </div>
