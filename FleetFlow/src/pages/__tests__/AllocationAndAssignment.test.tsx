@@ -34,14 +34,16 @@ let requestsData: Request[] = [plantRequest]
 
 const scoreAssetsMock = vi.hoisted(() => vi.fn())
 const rankOperatorsMock = vi.hoisted(() => vi.fn())
+const createExternalHireMock = vi.hoisted(() => vi.fn())
 
-vi.mock('../../api/queries', () => ({
-  useRequestsQuery: () => ({ data: requestsData, isLoading: false, error: null }),
-  useAllocationsQuery: () => ({ data: [] }),
-  useOperatorAssignmentsQuery: () => ({ data: [] }),
-  scoreAssets: scoreAssetsMock,
-  rankOperators: rankOperatorsMock,
-}))
+  vi.mock('../../api/queries', () => ({
+    useRequestsQuery: () => ({ data: requestsData, isLoading: false, error: null }),
+    useAllocationsQuery: () => ({ data: [] }),
+    useOperatorAssignmentsQuery: () => ({ data: [] }),
+    scoreAssets: scoreAssetsMock,
+    rankOperators: rankOperatorsMock,
+    createExternalHire: createExternalHireMock,
+  }))
 
 const rpcMock = vi.hoisted(() => vi.fn())
 const insertMock = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
@@ -75,13 +77,14 @@ const renderWithClient = (ui: React.ReactElement) => {
 }
 
 describe('Plant allocation workflow', () => {
-  beforeEach(() => {
-    rpcMock.mockReset()
-    insertMock.mockClear()
-    fromMock.mockClear()
-    validateExternalHireMock.mockReset()
-    requestsData = [plantRequest]
-  })
+    beforeEach(() => {
+      rpcMock.mockReset()
+      insertMock.mockClear()
+      fromMock.mockClear()
+      validateExternalHireMock.mockReset()
+      createExternalHireMock.mockReset()
+      requestsData = [plantRequest]
+    })
 
   it('allocates asset internally', async () => {
     rpcMock.mockResolvedValueOnce({ error: null })
@@ -93,15 +96,14 @@ describe('Plant allocation workflow', () => {
     })
   })
 
-  it('falls back to external hire when no asset is available', async () => {
-    rpcMock.mockResolvedValueOnce({ error: { message: 'NO_INTERNAL_ASSET_AVAILABLE' } })
-    validateExternalHireMock.mockResolvedValueOnce([])
-    renderWithClient(<PlantCoordinatorPage />)
-    fireEvent.click(screen.getByText('Allocate Assets'))
-    await screen.findByText('1 external hire(s) created.')
-    expect(fromMock).toHaveBeenCalledWith('external_hires')
-    expect(insertMock).toHaveBeenCalledWith({ request_id: plantRequest.id })
-  })
+    it('falls back to external hire when no asset is available', async () => {
+      rpcMock.mockResolvedValueOnce({ error: { message: 'NO_INTERNAL_ASSET_AVAILABLE' } })
+      validateExternalHireMock.mockResolvedValueOnce([])
+      renderWithClient(<PlantCoordinatorPage />)
+      fireEvent.click(screen.getByText('Allocate Assets'))
+      await screen.findByText('1 external hire(s) created.')
+      expect(createExternalHireMock).toHaveBeenCalledWith(plantRequest.id)
+    })
 })
 
 describe('Workforce assignment workflow', () => {

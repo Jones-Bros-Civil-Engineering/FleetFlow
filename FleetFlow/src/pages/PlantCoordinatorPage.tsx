@@ -4,6 +4,7 @@ import {
   useRequestsQuery,
   useAllocationsQuery,
   scoreAssets,
+  createExternalHire,
 } from '../api/queries'
 import type { Request, AssetScore } from '../types'
 import { supabase } from '../lib/supabase'
@@ -65,12 +66,7 @@ export default function PlantCoordinatorPage() {
                 }
               }
             }
-            const { error: hireError } = await supabase
-              .from('external_hires')
-              .insert({ request_id: request.id })
-            if (hireError) {
-              throw new Error(hireError.message)
-            }
+            await createExternalHire(request.id)
             externalCount++
             continue
           }

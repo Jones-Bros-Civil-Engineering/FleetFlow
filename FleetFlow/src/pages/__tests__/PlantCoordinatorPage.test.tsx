@@ -24,6 +24,7 @@ vi.mock('../../api/queries', () => ({
   useRequestsQuery: () => ({ data: [request], isLoading: false, error: null }),
   useAllocationsQuery: () => ({ data: [] }),
   scoreAssets: scoreAssetsMock,
+  createExternalHire: vi.fn().mockResolvedValue(undefined),
 }))
 
 const rpcMock = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
