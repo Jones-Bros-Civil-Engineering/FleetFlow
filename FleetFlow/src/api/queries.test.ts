@@ -27,6 +27,11 @@ import {
   useRequestsQuery,
   fetchOperatorAssignments,
   useOperatorAssignmentsQuery,
+  fetchExternalHires,
+  useExternalHiresQuery,
+  createExternalHire,
+  updateExternalHire,
+  cancelExternalHire,
 } from './queries'
 
 describe('useExampleQuery', () => {
@@ -314,6 +319,78 @@ describe('reassignAllocation', () => {
   it('throws on overlap error', async () => {
     rpcMock.mockResolvedValue({ data: null, error: { message: 'ALLOCATION_OVERLAP' } })
     await expect(reassignAllocation('alloc1')).rejects.toThrow('ALLOCATION_OVERLAP')
+  })
+})
+
+describe('useExternalHiresQuery', () => {
+  beforeEach(() => (useQuery as Mock).mockReset())
+
+  it('calls useQuery with external hires key and fetcher', () => {
+    const fakeResult = { data: [] }
+    ;(useQuery as Mock).mockReturnValue(fakeResult)
+
+    const result = useExternalHiresQuery()
+
+    expect(useQuery).toHaveBeenCalledWith({
+      queryKey: ['external-hires'],
+      queryFn: fetchExternalHires,
+    })
+    expect(result).toBe(fakeResult)
+  })
+})
+
+describe('fetchExternalHires', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('returns parsed hires', async () => {
+    const select = vi.fn().mockResolvedValue({
+      data: [{ id: 1, contract_id: 1, request_id: 1 }],
+      error: null,
+    })
+    fromMock.mockReturnValue({ select })
+    const result = await fetchExternalHires()
+    expect(fromMock).toHaveBeenCalledWith('vw_external_hires')
+    expect(result).toEqual([{ id: '1', contract_id: '1', request_id: '1' }])
+  })
+})
+
+describe('createExternalHire', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('inserts hire', async () => {
+    const insert = vi.fn().mockResolvedValue({ error: null })
+    fromMock.mockReturnValue({ insert })
+    await createExternalHire('1')
+    expect(fromMock).toHaveBeenCalledWith('external_hires')
+    expect(insert).toHaveBeenCalledWith({ request_id: '1' })
+  })
+})
+
+describe('updateExternalHire', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('updates hire', async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null })
+    const update = vi.fn(() => ({ eq }))
+    fromMock.mockReturnValue({ update })
+    await updateExternalHire('1', { request_id: '2' })
+    expect(fromMock).toHaveBeenCalledWith('external_hires')
+    expect(update).toHaveBeenCalledWith({ request_id: '2' })
+    expect(eq).toHaveBeenCalledWith('id', '1')
+  })
+})
+
+describe('cancelExternalHire', () => {
+  beforeEach(() => fromMock.mockReset())
+
+  it('deletes hire', async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null })
+    const del = vi.fn(() => ({ eq }))
+    fromMock.mockReturnValue({ delete: del })
+    await cancelExternalHire('1')
+    expect(fromMock).toHaveBeenCalledWith('external_hires')
+    expect(del).toHaveBeenCalled()
+    expect(eq).toHaveBeenCalledWith('id', '1')
   })
 })
 

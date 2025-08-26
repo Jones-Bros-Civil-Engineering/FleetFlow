@@ -1,14 +1,16 @@
 import { test, expect } from '@playwright/experimental-ct-react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import * as ReactQuery from '@tanstack/react-query'
 import type { ReactElement } from 'react'
 import PlantCoordinatorPage from '../PlantCoordinatorPage'
 import WorkforceCoordinatorPage from '../WorkforceCoordinatorPage'
 import { supabase } from '../../lib/supabase'
 
 const withProviders = (component: ReactElement) => {
-  const queryClient = new QueryClient()
+  const queryClient = new ReactQuery.QueryClient()
   return (
-    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
+    <ReactQuery.QueryClientProvider client={queryClient}>
+      {component}
+    </ReactQuery.QueryClientProvider>
   )
 }
 

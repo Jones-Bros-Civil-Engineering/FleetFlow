@@ -11,6 +11,7 @@ import {
   AssetScoreSchema,
   OperatorMatchSchema,
   OperatorAssignmentSchema,
+  ExternalHireSchema,
   type Example,
   type CalendarEvent,
   type EquipmentGroup,
@@ -21,6 +22,7 @@ import {
   type AssetScore,
   type OperatorMatch,
   type OperatorAssignment,
+  type ExternalHire,
 } from '../types'
 
 export const fetchExample = async (): Promise<Example[]> => {
@@ -162,6 +164,54 @@ export const rankOperators = async (
     throw new Error(error.message)
   }
   return OperatorMatchSchema.array().parse(data ?? [])
+}
+
+export const fetchExternalHires = async (): Promise<ExternalHire[]> => {
+  const { data, error } = await supabase.from('vw_external_hires').select('*')
+  if (error) {
+    throw new Error(error.message)
+  }
+  return ExternalHireSchema.array().parse(data ?? [])
+}
+
+export const useExternalHiresQuery = () =>
+  useQuery<ExternalHire[], Error>({
+    queryKey: ['external-hires'],
+    queryFn: fetchExternalHires,
+  })
+
+export const createExternalHire = async (
+  requestId: string,
+): Promise<void> => {
+  const { error } = await supabase
+    .from('external_hires')
+    .insert({ request_id: requestId })
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const updateExternalHire = async (
+  id: string,
+  updates: { request_id?: string | null; contract_id?: string },
+): Promise<void> => {
+  const { error } = await supabase
+    .from('external_hires')
+    .update(updates)
+    .eq('id', id)
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const cancelExternalHire = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('external_hires')
+    .delete()
+    .eq('id', id)
+  if (error) {
+    throw new Error(error.message)
+  }
 }
 
 export const offHireAllocation = async (

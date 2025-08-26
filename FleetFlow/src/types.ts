@@ -102,3 +102,10 @@ export const GroupRequiredTicketSchema = z.object({
   ticket_code: z.string(),
 })
 export type GroupRequiredTicket = z.infer<typeof GroupRequiredTicketSchema>
+
+export const ExternalHireSchema = z.object({
+  id: z.coerce.string(),
+  contract_id: z.coerce.string(),
+  request_id: z.coerce.string().nullable(),
+})
+export type ExternalHire = z.infer<typeof ExternalHireSchema>
