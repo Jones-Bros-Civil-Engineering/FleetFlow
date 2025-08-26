@@ -54,6 +54,17 @@ export default function LoginPage() {
         <button type='submit' disabled={submitting}>
           {submitting ? 'Signing In...' : 'Sign In'}
         </button>
+        {import.meta.env.DEV && (
+          <button
+            type='button'
+            onClick={() => {
+              localStorage.setItem('bypass-auth', 'true')
+              navigate('/')
+            }}
+          >
+            Bypass Login (dev)
+          </button>
+        )}
         {submitting && <div>Loading...</div>}
         {error && <div>{error}</div>}
       </form>

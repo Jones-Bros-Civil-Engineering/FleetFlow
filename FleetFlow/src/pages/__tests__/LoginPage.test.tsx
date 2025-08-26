@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from '@testing-library/react'
 import type { User } from '@supabase/supabase-js'
 import LoginPage from '../LoginPage'
 
@@ -23,6 +29,14 @@ vi.mock('../../components/auth-context', () => ({
 }))
 
 describe('LoginPage', () => {
+  beforeEach(() => {
+    cleanup()
+    navigateMock.mockClear()
+    signInMock.mockClear()
+    mockUser = null
+    localStorage.clear()
+    ;(import.meta as any).env = { ...(import.meta as any).env, DEV: true }
+  })
   it('redirects after successful sign-in', async () => {
     const { rerender } = render(<LoginPage />)
 
@@ -49,5 +63,13 @@ describe('LoginPage', () => {
     )
     expect(navigateMock).toHaveBeenCalledTimes(1)
     expect(navigateMock).not.toHaveBeenCalledWith('/login', expect.anything())
+  })
+
+  it('bypasses auth and navigates home', () => {
+    render(<LoginPage />)
+    fireEvent.click(
+      screen.getByRole('button', { name: /bypass login \(dev\)/i }),
+    )
+    expect(navigateMock).toHaveBeenCalledWith('/')
   })
 })
