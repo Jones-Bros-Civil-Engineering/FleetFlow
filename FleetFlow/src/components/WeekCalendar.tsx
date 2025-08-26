@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { FixedSizeList, type ListChildComponentProps } from 'react-window'
 import { getWeekDays } from '../lib/weeks'
 import type {
   CalendarEvent,
@@ -7,6 +8,35 @@ import type {
 } from '../types'
 import EventDetailsDrawer from './EventDetailsDrawer'
 import './week-calendar.css'
+
+const ROW_HEIGHT = 35
+
+interface UtilRowData {
+  groups: EquipmentGroup[]
+  utilization?: WeeklyGroupUtilization[]
+  weekStart: Date
+}
+
+function UtilizationRow({
+  index,
+  style,
+  data,
+}: ListChildComponentProps<UtilRowData>) {
+  const group = data.groups[index]
+  const util = data.utilization?.find(
+    (u) =>
+      u.group_id === group.id &&
+      new Date(u.week_start).toDateString() === data.weekStart.toDateString(),
+  )
+  return (
+    <div style={{ ...style, display: 'flex' }} className='utilization-row'>
+      <div style={{ flex: 1 }}>{group.name}</div>
+      <div style={{ width: '5rem', textAlign: 'center' }}>
+        {util?.on_hire_count ?? 0}
+      </div>
+    </div>
+  )
+}
 
 export interface WeekCalendarProps {
   selectedDate: Date
@@ -92,30 +122,22 @@ export default function WeekCalendar({
         </button>
       </div>
       {groups && groups.length > 0 && (
-        <table className='utilization-table'>
-          <thead>
-            <tr>
-              <th>Group</th>
-              <th>On hire</th>
-            </tr>
-          </thead>
-          <tbody>
-            {groups.map((g) => {
-              const util = utilization?.find(
-                (u) =>
-                  u.group_id === g.id &&
-                  new Date(u.week_start).toDateString() ===
-                    weekStart.toDateString()
-              )
-              return (
-                <tr key={g.id}>
-                  <td>{g.name}</td>
-                  <td>{util?.on_hire_count ?? 0}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        <div className='utilization-table'>
+          <div className='utilization-row header'>
+            <div style={{ flex: 1 }}>Group</div>
+            <div style={{ width: '5rem', textAlign: 'center' }}>On hire</div>
+          </div>
+          <FixedSizeList
+            className='utilization-list'
+            height={Math.min(groups.length, 10) * ROW_HEIGHT}
+            itemCount={groups.length}
+            itemSize={ROW_HEIGHT}
+            width='100%'
+            itemData={{ groups, utilization, weekStart }}
+          >
+            {UtilizationRow}
+          </FixedSizeList>
+        </div>
       )}
       <EventDetailsDrawer
         event={selectedEvent}
